@@ -274,6 +274,114 @@ Run your program at least three times with different answers and make sure:
 
 ---
 
+## How to Test Your Program (Step-by-Step Hand-Holding Guide)
+
+Testing just means **running your program and checking that it does what you expect**. You don't need any special tools — you already have everything you need. Follow along slowly; nothing here is scary.
+
+### Part A — Open a terminal in the right place
+
+The **terminal** (also called the "command line") is a text window where you type commands to your computer. Think of it as texting your computer instead of clicking buttons.
+
+1. Open your terminal:
+   - **VS Code:** click the menu `Terminal` → `New Terminal`. A panel opens at the bottom.
+   - **Mac:** open the `Terminal` app (press `Cmd + Space`, type "Terminal", press Enter).
+   - **Windows:** open `PowerShell` or `Command Prompt` from the Start menu.
+2. You need to be "inside" the folder that contains your file. Moving between folders is done with the `cd` command (`cd` stands for "change directory"). Type this and press Enter:
+
+   ```
+   cd assignments/module_01
+   ```
+
+3. Confirm your `basics.py` file is really there. Type this and press Enter:
+   - **Mac/Linux:** `ls`
+   - **Windows:** `dir`
+
+   You should see `basics.py` in the list. If you don't, you are in the wrong folder — use `cd ..` to go back up one level and try again. (`cd ..` means "go up to the folder above me.")
+
+### Part B — Run the program
+
+Type this exactly and press Enter:
+
+```
+python3 basics.py
+```
+
+> **If `python3` gives a "command not found" error, try `python basics.py` instead.** On some Windows setups the command is just `python`.
+
+The program should now start and ask you its first question. **The cursor will sit there blinking, waiting for you.** That is normal — it is waiting for you to type an answer and press Enter.
+
+### Part C — Answer the questions
+
+Type an answer to each question and press Enter after each one. For your very first run, use these exact values so you can predict the result:
+
+| Question | Type this |
+|----------|-----------|
+| Name | `Alex` |
+| Age | `20` |
+| GPA | `3.75` |
+
+### Part D — Check the output against the expected result
+
+After you answer all three questions, your program should print **exactly** this (assuming the current year in Step 4 is 2026):
+
+```
+--- Student Profile ---
+Name: Alex
+Age: 20
+Approximate birth year: 2006
+GPA: 3.75
+GPA status: Excellent
+```
+
+Compare your output to this line by line, like a spot-the-difference puzzle:
+- Is the header there and spelled correctly?
+- Is the birth year `2006` (that's `2026 - 20`)?
+- Does the GPA show **two** digits after the dot (`3.75`)?
+- Did the status say `Excellent` (because `3.75` is 3.5 or higher)?
+
+If every line matches, that part works. 🎉
+
+### Part E — Test the GPA status ranges on purpose
+
+The GPA status message has **four** possible answers, and you must check that each one shows up. Run the program four separate times. Each time, type the same name and age, but change the GPA to the value in the table below and confirm you get the matching status:
+
+| Type this GPA | Expected status line |
+|---------------|----------------------|
+| `3.9` | `GPA status: Excellent` |
+| `3.2` | `GPA status: Good` |
+| `2.5` | `GPA status: Satisfactory` |
+| `1.4` | `GPA status: Needs improvement` |
+
+This is called **testing the boundaries** — making sure every branch of your `if / elif / else` actually works, not just the first one.
+
+**Bonus edge cases** (try these to be thorough): type exactly `3.5` (should be `Excellent`, not `Good`) and exactly `3.0` (should be `Good`, not `Satisfactory`). Values that sit right on the line are where mistakes hide.
+
+### Part F — What to do when something goes wrong
+
+Errors are normal and expected — even professional programmers see them constantly. When Python hits a problem it prints a **red error message** (called a "traceback"). Don't panic. Read it from the **bottom up** — the last line usually tells you what went wrong.
+
+| What you see | What it usually means | How to fix it |
+|--------------|-----------------------|---------------|
+| `ValueError: invalid literal for int()` | You typed letters where a number was expected (or vice-versa) | Run again and type a whole number for age |
+| `TypeError: ... str ... int` | You tried to do math on text without converting it | Make sure age uses `int(...)` and GPA uses `float(...)` |
+| `NameError: name 'gpa' is not defined` | A variable name is misspelled, or used before it was created | Check spelling; make sure the variable is created above the line that uses it |
+| `SyntaxError` | A typo like a missing quote, colon, or parenthesis | Look at the line number Python points to and check for a missing `"`, `:`, or `)` |
+| Program never stops / no output | It is still waiting for you to type an answer | Click the terminal, type an answer, press Enter |
+
+After you fix the code, **save the file** and run `python3 basics.py` again. Testing is a loop: run → check → fix → run again. Repeat until every run is clean.
+
+### Part G — Final confidence check
+
+Before you move on, run the program **one last time** from top to bottom and confirm:
+- It starts, asks all three questions, and never crashes.
+- The birth-year math is correct for the age you typed.
+- The GPA always prints with exactly two decimals.
+- The status line matches the GPA you entered.
+
+If all four are true, your program is working and you are ready to submit. Use the checklist below as your final sign-off.
+
+---
+
 ### Checklist Before Submitting
 
 - [ ] `input()` is used for name, age, and GPA (all three ask the user)
