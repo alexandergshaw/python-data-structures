@@ -170,3 +170,119 @@ print(counts)  # {'apple': 3, 'banana': 2, 'cherry': 1}
 - When filtering a list, start with an empty list `[]` and `append()` items that pass your condition.
 - When counting with a dictionary, the pattern `counts[word] = counts.get(word, 0) + 1` is a compact shorthand for the if/else shown above.
 - List indices start at **0**, not 1. Accessing an index that doesn't exist causes an `IndexError` — check `len()` first if you're not sure.
+
+---
+
+## Assignment Instructions
+
+**File to create:** `module_03/collections.py`
+
+You will build a small student-record system using functions, lists, and dictionaries. Follow each step in order and call each function in a `main()` function at the bottom of your file.
+
+---
+
+### Step 1 — Store student records
+
+Create a **list of dictionaries** where each dictionary represents one student. Each student must have at least these four keys:
+
+```python
+students = [
+    {"name": "Alice", "grade": 91, "major": "CS"},
+    {"name": "Bob",   "grade": 54, "major": "Math"},
+    {"name": "Carol", "grade": 78, "major": "CS"},
+    {"name": "David", "grade": 63, "major": "Art"},
+    {"name": "Eve",   "grade": 45, "major": "Math"},
+    {"name": "Frank", "grade": 88, "major": "CS"},
+]
+```
+
+You must have **at least 6 students** with a mix of grades and majors.
+
+---
+
+### Step 2 — Write `get_passing_students(students)`
+
+Write a function that takes the student list and returns a **new list** containing only the students whose grade is 60 or above.
+
+```python
+def get_passing_students(students):
+    # Your code here
+```
+
+Test it:
+```python
+passing = get_passing_students(students)
+print(passing)  # Should show Alice, Carol, David, Frank
+```
+
+---
+
+### Step 3 — Write `get_average_grade(students)`
+
+Write a function that takes the student list and returns the **average grade** as a float. Use a `for` loop to sum all grades, then divide by the number of students.
+
+Return `0` if the list is empty (avoid division by zero).
+
+---
+
+### Step 4 — Write `count_by_major(students)`
+
+Write a function that returns a **dictionary** mapping each major to how many students are enrolled in it.
+
+```python
+{"CS": 3, "Math": 2, "Art": 1}
+```
+
+Use the counting pattern from the concept section: `counts[major] = counts.get(major, 0) + 1`.
+
+---
+
+### Step 5 — Write `get_top_student(students)`
+
+Write a function that returns the **dictionary** of the student with the highest grade. If two students are tied, return either one.
+
+**Hint:** Start by assuming the first student is the top, then loop through the rest and update if you find a higher grade.
+
+---
+
+### Step 6 — Write `filter_by_major(students, major)`
+
+Write a function that takes the student list and a major name (string) and returns a list of all students in that major.
+
+```python
+cs_students = filter_by_major(students, "CS")
+# → [Alice, Carol, Frank]
+```
+
+---
+
+### Step 7 — Print a formatted report
+
+In your `main()` function, call all five functions and print the results in a clean format:
+
+```
+--- Student Report ---
+All students: 6
+Passing students: 4
+Average grade: 69.83
+Students by major: {'CS': 3, 'Math': 2, 'Art': 1}
+Top student: Alice (91)
+
+CS students:
+  Alice — 91
+  Carol — 78
+  Frank — 88
+```
+
+---
+
+### Checklist Before Submitting
+
+- [ ] You have at least 6 students defined as a list of dictionaries.
+- [ ] `get_passing_students()` returns only students with grade ≥ 60.
+- [ ] `get_average_grade()` returns a float and handles an empty list.
+- [ ] `count_by_major()` returns a dictionary of major → count.
+- [ ] `get_top_student()` returns the student dictionary with the highest grade.
+- [ ] `filter_by_major()` returns students matching the given major.
+- [ ] A `main()` function calls all five functions and prints a formatted report.
+- [ ] All logic is inside functions — no bare code outside of `main()`.

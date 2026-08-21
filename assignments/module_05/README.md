@@ -136,3 +136,123 @@ If someone creates a subclass of `Shape` and forgets to implement `area()`, they
 - Use `super().__init__(...)` in child classes to ensure the parent is initialized properly before you add your own setup.
 - Raise `NotImplementedError` in the parent to signal clearly: "every child class MUST implement this method."
 - Test each class independently before combining them — create an object, call its methods, and verify the output.
+
+---
+
+## Assignment Instructions
+
+**File to create:** `module_05/shapes.py`
+
+You will build a small shape hierarchy using classes, inheritance, and polymorphism. Follow each step in order.
+
+---
+
+### Step 1 — Create the `Shape` base class
+
+Create a class called `Shape` with:
+- An `__init__` method that accepts and stores a `color` string (e.g., `"red"`).
+- A method `area(self)` that raises `NotImplementedError` with the message `"Subclasses must implement area()"`.
+- A method `perimeter(self)` that raises `NotImplementedError` with the message `"Subclasses must implement perimeter()"`.
+- A method `describe(self)` that **returns** a string like: `"A red shape with area 78.54 and perimeter 31.42"`. (It should call `self.area()` and `self.perimeter()` internally, and format both values to 2 decimal places.)
+
+---
+
+### Step 2 — Create the `Circle` subclass
+
+Create a class `Circle` that inherits from `Shape`.
+
+- `__init__` takes `color` and `radius`. Call `super().__init__(color)` and store `radius`.
+- `area(self)` returns `π * radius²`. Use `import math` and `math.pi`.
+- `perimeter(self)` returns `2 * π * radius` (circumference).
+
+Test it:
+```python
+c = Circle("blue", 5)
+print(c.area())        # 78.539...
+print(c.perimeter())   # 31.415...
+print(c.describe())    # A blue shape with area 78.54 and perimeter 31.42
+```
+
+---
+
+### Step 3 — Create the `Rectangle` subclass
+
+Create a class `Rectangle` that inherits from `Shape`.
+
+- `__init__` takes `color`, `width`, and `height`. Store both dimensions.
+- `area(self)` returns `width * height`.
+- `perimeter(self)` returns `2 * (width + height)`.
+
+---
+
+### Step 4 — Create the `Triangle` subclass
+
+Create a class `Triangle` that inherits from `Shape`.
+
+- `__init__` takes `color`, `a`, `b`, `c` (the three side lengths).
+- `perimeter(self)` returns `a + b + c`.
+- `area(self)` uses **Heron's formula**:
+
+```python
+s = (a + b + c) / 2
+area = math.sqrt(s * (s - a) * (s - b) * (s - c))
+```
+
+---
+
+### Step 5 — Demonstrate polymorphism
+
+Create a list containing at least one `Circle`, one `Rectangle`, and one `Triangle` with different colors. Loop over the list and call `describe()` on each shape — you should not need to check what type each shape is.
+
+```python
+shapes = [
+    Circle("red", 3),
+    Rectangle("green", 4, 6),
+    Triangle("blue", 3, 4, 5),
+]
+
+for shape in shapes:
+    print(shape.describe())
+```
+
+Expected output (values may differ based on your dimensions):
+```
+A red shape with area 28.27 and perimeter 18.85
+A green shape with area 24.00 and perimeter 20.00
+A blue shape with area 6.00 and perimeter 12.00
+```
+
+---
+
+### Step 6 — Add a `Square` subclass
+
+Create a class `Square` that inherits from **`Rectangle`** (not `Shape` directly).
+
+- `__init__` takes `color` and `side`. Call `super().__init__(color, side, side)`.
+- You do **not** need to override `area()` or `perimeter()` — they should work automatically through inheritance.
+
+Add a `Square` to your shapes list and verify `describe()` works correctly.
+
+---
+
+### Step 7 — Find the largest shape
+
+Write a standalone function (outside any class) called `largest_shape(shapes)` that accepts a list of shapes and returns the one with the greatest area.
+
+```python
+biggest = largest_shape(shapes)
+print(f"Largest: {biggest.describe()}")
+```
+
+---
+
+### Checklist Before Submitting
+
+- [ ] `Shape` base class exists with `area()`, `perimeter()`, and `describe()`.
+- [ ] `area()` and `perimeter()` in `Shape` raise `NotImplementedError`.
+- [ ] `Circle`, `Rectangle`, and `Triangle` all correctly implement `area()` and `perimeter()`.
+- [ ] `Square` inherits from `Rectangle` and works without redefining area/perimeter.
+- [ ] All subclasses call `super().__init__(color)` (or equivalent).
+- [ ] The polymorphism loop calls `describe()` on all shapes without type-checking.
+- [ ] `largest_shape()` function works correctly.
+- [ ] All output is formatted to 2 decimal places.

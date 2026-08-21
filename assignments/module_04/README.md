@@ -132,3 +132,120 @@ If `n` = 1,000, this performs up to 1,000,000 operations.
 - **Drop constants and lower-order terms.** O(3n + 100) simplifies to O(n). Big O only cares about what dominates as n → ∞.
 - Space complexity counts the **extra** memory your function allocates — not the input itself (usually). A function that creates a new list of size n has O(n) space complexity even if it does very little work.
 - Practice by estimating the complexity of functions you wrote in previous modules before looking at the answer.
+
+---
+
+## Assignment Instructions
+
+**File to create:** `module_04/complexity.py`
+
+You will implement several functions and then **analyze and document the complexity** of each one. Read every step carefully — the analysis is just as important as the code.
+
+---
+
+### Step 1 — Implement and label `find_first(lst, target)`
+
+Write a function that returns the **index** of the first occurrence of `target` in `lst`, or `-1` if it isn't there.
+
+After writing it, add a comment above the function that states:
+- Its **time complexity** (best, average, worst)
+- Its **space complexity**
+- A one-sentence explanation of why
+
+Example comment format:
+```python
+# Time: O(1) best, O(n) average/worst — must scan up to n elements
+# Space: O(1) — no extra memory proportional to input
+def find_first(lst, target):
+    ...
+```
+
+---
+
+### Step 2 — Implement and label `has_duplicates_slow(lst)`
+
+Write a function that checks whether any value appears more than once in `lst` using **two nested loops** (compare every pair of elements).
+
+Label its complexity. This is the O(n²) approach.
+
+---
+
+### Step 3 — Implement and label `has_duplicates_fast(lst)`
+
+Write a **second version** of duplicate detection using a Python `set`. Add each element to the set; if it's already there, return `True`.
+
+Label its complexity. This is the O(n) approach.
+
+---
+
+### Step 4 — Implement and label `binary_search(sorted_lst, target)`
+
+Write a binary search function (refer to the concept section for the algorithm). Label it with its time and space complexity.
+
+---
+
+### Step 5 — Implement and label `sum_pairs(lst)`
+
+Write a function that returns all pairs `(a, b)` from `lst` where `a + b == 0`. Use nested loops.
+
+```python
+sum_pairs([-3, 1, 3, -1, 2])
+# → [(-3, 3), (1, -1)]
+```
+
+Label its complexity.
+
+---
+
+### Step 6 — Time the two duplicate-detection functions
+
+At the bottom of your file, use Python's `time` module to measure how long `has_duplicates_slow` and `has_duplicates_fast` take on a large list:
+
+```python
+import time
+import random
+
+big_list = list(range(5000))   # No duplicates — worst case for both
+
+start = time.time()
+has_duplicates_slow(big_list)
+slow_time = time.time() - start
+
+start = time.time()
+has_duplicates_fast(big_list)
+fast_time = time.time() - start
+
+print(f"Slow (O(n²)): {slow_time:.4f}s")
+print(f"Fast (O(n)):  {fast_time:.4f}s")
+```
+
+Run it and observe the difference. You don't need to submit the numbers, but you should see the O(n²) version is dramatically slower.
+
+---
+
+### Step 7 — Written complexity summary
+
+At the **top** of your file (as a multi-line comment or docstring), write a table summarizing the complexity of all five functions:
+
+```python
+"""
+Function                  | Time (worst) | Space | Notes
+--------------------------|--------------|-------|-------------------------------
+find_first                | O(n)         | O(1)  | Linear scan
+has_duplicates_slow       | O(n²)        | O(1)  | Nested loops
+has_duplicates_fast       | O(n)         | O(n)  | Set stores up to n elements
+binary_search             | O(log n)     | O(1)  | Halves search space each step
+sum_pairs                 | O(n²)        | O(n)  | Nested loops, result list
+"""
+```
+
+---
+
+### Checklist Before Submitting
+
+- [ ] All five functions are implemented and return correct results.
+- [ ] Every function has a comment stating its time complexity (best/average/worst) and space complexity.
+- [ ] `has_duplicates_fast` uses a `set`, not nested loops.
+- [ ] `binary_search` requires a sorted list and correctly returns `-1` when not found.
+- [ ] The timing comparison at the bottom is present and runs without errors.
+- [ ] The written summary table at the top is filled in for all five functions.

@@ -184,3 +184,152 @@ A BST is **balanced** when its height is O(log n). In the worst case (inserting 
 - In-order traversal of a BST produces a **sorted list**. Use this to verify your tree is correct.
 - Height of a single node is 0, and height of an empty tree is -1 (or -∞). Be consistent in your choice.
 - For deletion, the trickiest case is deleting a node with **two children** — replace it with its **in-order successor** (smallest node in its right subtree).
+
+---
+
+## Assignment Instructions
+
+**File to create:** `module_10/bst.py`
+
+You will build a complete Binary Search Tree from scratch. Work through each step in order. After each step, add test calls to a `main()` function and run the file to verify.
+
+---
+
+### Step 1 — `TreeNode` and `BinarySearchTree` classes
+
+Create `TreeNode` with `value`, `left = None`, `right = None`.
+
+Create `BinarySearchTree` with `self.root = None`.
+
+---
+
+### Step 2 — `insert(value)`
+
+Insert `value` into the BST following the BST property. Write a recursive helper `_insert(node, value)` that returns the updated node.
+
+Test:
+```python
+bst = BinarySearchTree()
+for v in [8, 3, 10, 1, 6, 14, 4, 7]:
+    bst.insert(v)
+```
+
+After inserting all values, the tree should look like the diagram at the top of this README.
+
+---
+
+### Step 3 — `search(value)`
+
+Return `True` if `value` is in the BST, `False` otherwise.
+
+```python
+print(bst.search(6))    # True
+print(bst.search(5))    # False
+print(bst.search(14))   # True
+```
+
+---
+
+### Step 4 — `inorder()`, `preorder()`, `postorder()`
+
+Implement all three depth-first traversals. Each returns a **list** of values in the traversal order.
+
+```python
+print(bst.inorder())    # [1, 3, 4, 6, 7, 8, 10, 14]  ← sorted!
+print(bst.preorder())   # [8, 3, 1, 6, 4, 7, 10, 14]
+print(bst.postorder())  # [1, 4, 7, 6, 3, 14, 10, 8]
+```
+
+**Verify:** The in-order result must be sorted. If it isn't, your `insert()` has a bug.
+
+---
+
+### Step 5 — `level_order()`
+
+Return a list of values visited level by level (breadth-first). Use a queue (`collections.deque`).
+
+```python
+print(bst.level_order())   # [8, 3, 10, 1, 6, 14, 4, 7]
+```
+
+---
+
+### Step 6 — `height()`
+
+Return the height of the tree (longest path from root to a leaf). An empty tree has height `-1`; a single-node tree has height `0`.
+
+```python
+print(bst.height())   # 3
+```
+
+---
+
+### Step 7 — `minimum()` and `maximum()`
+
+Return the minimum (leftmost) and maximum (rightmost) values in the tree. Raise `ValueError` if the tree is empty.
+
+```python
+print(bst.minimum())   # 1
+print(bst.maximum())   # 14
+```
+
+---
+
+### Step 8 — `delete(value)`
+
+Remove the node with the given value. Handle all three cases:
+1. **No children (leaf):** Simply remove the node.
+2. **One child:** Replace the node with its child.
+3. **Two children:** Replace the node's value with its **in-order successor** (smallest value in the right subtree), then delete the successor from the right subtree.
+
+```python
+bst.delete(3)
+print(bst.inorder())   # [1, 4, 6, 7, 8, 10, 14]
+bst.delete(8)          # Deleting the root
+print(bst.inorder())   # [1, 4, 6, 7, 10, 14]
+```
+
+---
+
+### Step 9 — `__str__()` for pretty printing
+
+Implement a `__str__` method that prints the tree sideways (right subtree at top, root in middle, left subtree at bottom). Use a recursive helper that passes an indentation level:
+
+```
+        14
+    10
+8
+        7
+    6
+        4
+    3
+        1
+```
+
+**Hint:** This is a reverse in-order traversal (right → root → left) with increasing indentation.
+
+---
+
+### Step 10 — Edge case tests
+
+Add tests for these cases in `main()`:
+- Search on an empty tree → `False`
+- Insert duplicates (decide: ignore or allow — document your choice)
+- Delete a value not in the tree → tree unchanged
+- `height()` on a single-node tree → `0`
+- `minimum()` on an empty tree → `ValueError`
+
+---
+
+### Checklist Before Submitting
+
+- [ ] `insert()` maintains the BST property for all test values.
+- [ ] `search()` returns `True`/`False` correctly.
+- [ ] `inorder()` returns values in sorted order.
+- [ ] `preorder()` and `postorder()` return values in the correct order.
+- [ ] `level_order()` returns values level by level.
+- [ ] `height()` returns `-1` for empty, `0` for single node.
+- [ ] `minimum()` and `maximum()` raise `ValueError` on an empty tree.
+- [ ] `delete()` correctly handles leaf, one-child, and two-children cases.
+- [ ] `__str__()` displays the tree sideways with indentation.
+- [ ] All edge case tests are present in `main()`.

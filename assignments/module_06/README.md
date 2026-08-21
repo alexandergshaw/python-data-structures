@@ -138,3 +138,153 @@ Use a linked list when you need fast insertions/deletions at the front and don't
 - When traversing, use a `current` variable — **never** advance `self.head` directly, or you'll lose the list.
 - For deletion, you need the node **before** the one you want to remove. That's why you check `current.next.value` (the next node's value) while sitting on `current`.
 - After every operation, print the full list to verify the result is what you expected.
+
+---
+
+## Assignment Instructions
+
+**File to create:** `module_06/linked_list.py`
+
+You will implement a complete `LinkedList` class from scratch, then demonstrate it with a real use case. Work through each step in order — each one adds a new method to the class.
+
+---
+
+### Step 1 — Implement the `Node` class
+
+Create a `Node` class with:
+- `value` — the data stored in this node
+- `next` — initialized to `None`
+
+---
+
+### Step 2 — Implement the `LinkedList` class skeleton
+
+Create a `LinkedList` class with:
+- `__init__` that sets `self.head = None`
+- A `__str__` method that returns a string representation of the list, like:  
+  `"10 → 20 → 30 → None"`  
+  **Hint:** Traverse the list, collect values into a list, then `" → ".join(...)` them and append `" → None"`.
+
+Test it immediately:
+```python
+ll = LinkedList()
+print(ll)   # None
+```
+
+---
+
+### Step 3 — Implement `append(value)`
+
+Add a new node to the **end** of the list. Handle the empty list case (new node becomes the head).
+
+Test:
+```python
+ll.append(10)
+ll.append(20)
+ll.append(30)
+print(ll)   # 10 → 20 → 30 → None
+```
+
+---
+
+### Step 4 — Implement `prepend(value)`
+
+Add a new node to the **front** of the list.
+
+Test:
+```python
+ll.prepend(5)
+print(ll)   # 5 → 10 → 20 → 30 → None
+```
+
+---
+
+### Step 5 — Implement `delete(value)`
+
+Remove the **first** node whose value matches the given value. Handle these cases:
+1. Empty list — do nothing.
+2. The head node matches — update `self.head`.
+3. A middle or tail node matches — relink the previous node's `next`.
+4. Value not found — do nothing.
+
+Test:
+```python
+ll.delete(20)
+print(ll)   # 5 → 10 → 30 → None
+ll.delete(5)
+print(ll)   # 10 → 30 → None
+ll.delete(99)  # Not found — list unchanged
+print(ll)   # 10 → 30 → None
+```
+
+---
+
+### Step 6 — Implement `search(value)`
+
+Return `True` if the value exists in the list, `False` otherwise.
+
+```python
+print(ll.search(10))   # True
+print(ll.search(99))   # False
+```
+
+---
+
+### Step 7 — Implement `length()`
+
+Return the number of nodes in the list by traversing and counting.
+
+```python
+print(ll.length())   # 2
+```
+
+---
+
+### Step 8 — Implement `reverse()`
+
+Reverse the list **in place** (do not create a new list). After reversing, `self.head` should point to what was previously the tail.
+
+**Hint:** Use three variables — `prev`, `current`, `next_node` — and re-link each node's `next` to point backward.
+
+```python
+ll.append(40)
+ll.append(50)
+print(ll)          # 10 → 30 → 40 → 50 → None
+ll.reverse()
+print(ll)          # 50 → 40 → 30 → 10 → None
+```
+
+---
+
+### Step 9 — Real-world demo: browser history
+
+At the bottom of your file (in a `main()` function), simulate a simple browser history using your linked list:
+
+1. Prepend each URL as the user "visits" it (most recent at the front).
+2. Print the full history.
+3. Delete a URL (user clears it from history).
+4. Print the updated history.
+
+```python
+history = LinkedList()
+for url in ["google.com", "github.com", "stackoverflow.com", "python.org"]:
+    history.prepend(url)
+print("History:", history)
+history.delete("github.com")
+print("After removing github.com:", history)
+print("Total pages:", history.length())
+```
+
+---
+
+### Checklist Before Submitting
+
+- [ ] `Node` class with `value` and `next` attributes.
+- [ ] `LinkedList.__str__` produces the correct `"a → b → ... → None"` format.
+- [ ] `append()` adds to the end; handles empty list.
+- [ ] `prepend()` adds to the front.
+- [ ] `delete()` handles all four edge cases (empty, head match, middle/tail match, not found).
+- [ ] `search()` returns `True`/`False` correctly.
+- [ ] `length()` returns the correct count.
+- [ ] `reverse()` reverses in place without creating a new list.
+- [ ] Browser history demo runs correctly in `main()`.

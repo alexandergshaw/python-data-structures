@@ -158,3 +158,161 @@ print(climb_stairs(5))  # 8
 - Use `float('inf')` as the initial value when you want to minimize — it's larger than any real answer, so the first valid solution will always replace it.
 - Memoization (top-down) is often easier to write first — add `@functools.lru_cache(maxsize=None)` above a recursive function to get automatic memoization.
 - Once you understand the recursive solution, convert it to tabulation (bottom-up) for better performance and no recursion limits.
+
+---
+
+## Assignment Instructions
+
+**File to create:** `module_15/dynamic_programming.py`
+
+You will implement five classic DP problems in two styles each (memoization and tabulation), then compare them. Work through each step in order.
+
+---
+
+### Step 1 — Fibonacci: memoization version
+
+Write `fib_memo(n, memo={})` that computes the nth Fibonacci number using top-down memoization. Do **not** use `@lru_cache` — implement the cache manually with a dictionary.
+
+```python
+print(fib_memo(0))    # 0
+print(fib_memo(1))    # 1
+print(fib_memo(10))   # 55
+print(fib_memo(50))   # 12586269025  (instant)
+```
+
+---
+
+### Step 2 — Fibonacci: tabulation version
+
+Write `fib_tab(n)` that builds a list `dp` of size `n+1` and fills it bottom-up.
+
+```python
+print(fib_tab(10))   # 55
+print(fib_tab(50))   # 12586269025
+assert fib_memo(30) == fib_tab(30), "Mismatch!"
+```
+
+---
+
+### Step 3 — Coin Change
+
+Write `coin_change(coins, amount)` using **bottom-up tabulation**. Return the minimum number of coins to make `amount`, or `-1` if it's impossible.
+
+```python
+print(coin_change([1, 5, 10, 25], 36))   # 3  (25+10+1)
+print(coin_change([10, 6, 1], 12))       # 2  (6+6) — greedy fails, DP wins!
+print(coin_change([2], 3))               # -1  (impossible)
+print(coin_change([1], 0))               # 0
+```
+
+**Hint:** Initialize `dp = [float('inf')] * (amount + 1)`, set `dp[0] = 0`, then for each amount from 1 to `amount`, try every coin.
+
+---
+
+### Step 4 — Climbing Stairs
+
+Write `climb_stairs(n)` that returns the number of distinct ways to climb `n` stairs, taking 1 or 2 steps at a time.
+
+```python
+print(climb_stairs(1))    # 1
+print(climb_stairs(2))    # 2
+print(climb_stairs(5))    # 8
+print(climb_stairs(10))   # 89
+```
+
+Add a comment explaining why the recurrence is the same as Fibonacci.
+
+---
+
+### Step 5 — Longest Common Subsequence
+
+Write `lcs(s1, s2)` using a 2D DP table. Return the **length** of the longest common subsequence.
+
+```python
+print(lcs("ABCBDAB", "BDCAB"))      # 4
+print(lcs("AGGTAB", "GXTXAYB"))     # 4
+print(lcs("", "ABC"))               # 0
+print(lcs("ABC", "ABC"))            # 3
+```
+
+Then write `lcs_sequence(s1, s2)` that returns the **actual subsequence string** (not just the length) by backtracking through the DP table.
+
+```python
+print(lcs_sequence("ABCBDAB", "BDCAB"))   # "BCAB" or "BDAB"
+```
+
+---
+
+### Step 6 — 0/1 Knapsack
+
+Write `knapsack(weights, values, capacity)` using a 2D DP table. Return the maximum total value achievable without exceeding `capacity`. Each item can be taken at most once.
+
+```python
+weights  = [1, 3, 4, 5]
+values   = [1, 4, 5, 7]
+print(knapsack(weights, values, 7))   # 9  (items 1 and 2: weight 3+4, value 4+5)
+print(knapsack(weights, values, 0))   # 0
+print(knapsack([], [], 10))           # 0
+```
+
+Also write `knapsack_items(weights, values, capacity)` that returns the **list of item indices** selected (backtracking through the table).
+
+```python
+print(knapsack_items(weights, values, 7))   # [1, 2]  (0-indexed)
+```
+
+---
+
+### Step 7 — Performance: memoization vs. tabulation
+
+Time both Fibonacci implementations for `n = 35` and print results:
+
+```python
+import time
+
+start = time.time()
+for _ in range(1000):
+    fib_memo(35)
+print(f"Memo (1000 calls, n=35): {time.time()-start:.4f}s")
+
+start = time.time()
+for _ in range(1000):
+    fib_tab(35)
+print(f"Tab  (1000 calls, n=35): {time.time()-start:.4f}s")
+```
+
+In a comment, explain which is faster and why. (Tabulation usually wins because it avoids function call overhead.)
+
+---
+
+### Step 8 — DP summary table
+
+At the top of your file (as a docstring), add a summary of each problem's recurrence relation:
+
+```python
+"""
+Problem            | Recurrence
+-------------------|------------------------------------------------------------
+Fibonacci          | fib(n) = fib(n-1) + fib(n-2)
+Coin Change        | dp[a] = min(dp[a - c] + 1) for each coin c
+Climbing Stairs    | dp[n] = dp[n-1] + dp[n-2]  (same as Fibonacci!)
+LCS                | dp[i][j] = dp[i-1][j-1]+1 if match, else max(dp[i-1][j], dp[i][j-1])
+Knapsack           | dp[i][w] = max(dp[i-1][w], dp[i-1][w-wt]+val) if wt<=w
+"""
+```
+
+---
+
+### Checklist Before Submitting
+
+- [ ] `fib_memo` and `fib_tab` return correct results and agree with each other.
+- [ ] `fib_memo(50)` completes instantly (proves memoization is working).
+- [ ] `coin_change` returns `-1` when the amount is impossible, and `0` for amount=0.
+- [ ] `coin_change([10,6,1], 12)` returns `2` (demonstrating DP beats greedy).
+- [ ] `climb_stairs` matches the Fibonacci sequence (offset by 1).
+- [ ] `lcs` returns correct lengths for all test cases.
+- [ ] `lcs_sequence` returns a valid common subsequence string.
+- [ ] `knapsack` returns the correct maximum value.
+- [ ] `knapsack_items` returns indices that, when selected, achieve the maximum value.
+- [ ] Performance comparison is present and includes a comment.
+- [ ] DP summary docstring is present at the top of the file.

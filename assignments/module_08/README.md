@@ -127,3 +127,138 @@ Follow this three-step process:
 - Recursive functions look like they do nothing useful — until the base case is hit and results start flowing back. Trust the process!
 - Don't use a loop *inside* a recursive function — if you need a loop, it's a sign you haven't broken the problem down recursively yet.
 - For list problems, `list[1:]` (all but the first) or `list[:-1]` (all but the last) are your best friends for reducing the problem size.
+
+---
+
+## Assignment Instructions
+
+**File to create:** `module_08/recursion.py`
+
+You will implement six recursive functions and one recursive problem of your choosing. **You may not use any loops (`for`, `while`) inside any of these functions** — recursion only.
+
+---
+
+### Step 1 — `factorial(n)`
+
+Return `n!` (n factorial). Recall: `0! = 1`, `1! = 1`, `5! = 120`.
+
+```python
+print(factorial(0))   # 1
+print(factorial(5))   # 120
+print(factorial(10))  # 3628800
+```
+
+---
+
+### Step 2 — `fibonacci(n)`
+
+Return the nth Fibonacci number (0-indexed). Recall: 0, 1, 1, 2, 3, 5, 8, 13, 21 …
+
+```python
+print(fibonacci(0))   # 0
+print(fibonacci(1))   # 1
+print(fibonacci(7))   # 13
+print(fibonacci(10))  # 55
+```
+
+---
+
+### Step 3 — `recursive_sum(numbers)`
+
+Return the sum of all numbers in a list using recursion.
+
+```python
+print(recursive_sum([]))           # 0
+print(recursive_sum([5]))          # 5
+print(recursive_sum([1, 2, 3, 4])) # 10
+```
+
+**Hint:** The sum of a list is the first element plus the sum of the rest.
+
+---
+
+### Step 4 — `reverse_string(s)`
+
+Return the string `s` reversed, using recursion.
+
+```python
+print(reverse_string(""))        # ""
+print(reverse_string("a"))       # "a"
+print(reverse_string("hello"))   # "olleh"
+print(reverse_string("Python"))  # "nohtyP"
+```
+
+**Hint:** The reverse of a string is the last character followed by the reverse of everything before it. Or: reverse of `s` = reverse of `s[1:]` + `s[0]`.
+
+---
+
+### Step 5 — `power(base, exp)`
+
+Return `base` raised to the power `exp`. Assume `exp >= 0`.
+
+```python
+print(power(2, 0))    # 1
+print(power(2, 10))   # 1024
+print(power(3, 4))    # 81
+```
+
+---
+
+### Step 6 — `count_occurrences(lst, target)`
+
+Return how many times `target` appears in `lst`, using recursion.
+
+```python
+print(count_occurrences([], 5))                    # 0
+print(count_occurrences([1, 2, 3, 2, 2], 2))       # 3
+print(count_occurrences(["a", "b", "a"], "a"))     # 2
+```
+
+**Hint:** Check the first element; if it matches, return `1 + recurse on the rest`; otherwise return `0 + recurse on the rest`.
+
+---
+
+### Step 7 — `flatten(nested)`
+
+Given a list that may contain integers or other lists (nested arbitrarily deep), return a single flat list of all integers.
+
+```python
+print(flatten([1, [2, 3], [4, [5, 6]]]))   # [1, 2, 3, 4, 5, 6]
+print(flatten([]))                          # []
+print(flatten([1, [2, [3, [4]]]]))          # [1, 2, 3, 4]
+```
+
+**Hint:** For each element in the list — if it's a list, recursively flatten it; if it's not, wrap it in `[element]`. Concatenate all results.
+
+---
+
+### Step 8 — Call trace comment
+
+Pick **one** of your functions and add a detailed comment block above it showing the full call trace for a small example. For example, for `factorial(4)`:
+
+```python
+# factorial(4)
+#   → 4 * factorial(3)
+#       → 3 * factorial(2)
+#           → 2 * factorial(1)
+#               → 1 * factorial(0)
+#                   → 1          (base case)
+#               ← 1 * 1 = 1
+#           ← 2 * 1 = 2
+#       ← 3 * 2 = 6
+#   ← 4 * 6 = 24
+```
+
+---
+
+### Checklist Before Submitting
+
+- [ ] All six functions are implemented with **no loops** inside them.
+- [ ] `factorial(0)` returns `1`.
+- [ ] `fibonacci(0)` returns `0` and `fibonacci(1)` returns `1`.
+- [ ] `recursive_sum([])` returns `0` (empty list base case).
+- [ ] `reverse_string("")` returns `""`.
+- [ ] `power(n, 0)` returns `1` for any `n`.
+- [ ] `flatten` handles arbitrarily nested lists.
+- [ ] A call trace comment is present above at least one function.
+- [ ] All test calls shown above are included at the bottom of the file and produce the expected output.

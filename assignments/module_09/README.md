@@ -164,3 +164,149 @@ def quick_sort(arr):
 - For quick sort, the simple version (shown above) creates new lists at each step. This is slightly less memory-efficient but much easier to understand — start here.
 - When comparing algorithms, test with sorted, reverse-sorted, and random inputs — performance can vary dramatically.
 - Python's built-in `sorted()` and `.sort()` use **Timsort**, which is O(n log n) and extremely optimized. In real code, always prefer the built-in — implement sorting algorithms to understand them, not to use them in production.
+
+---
+
+## Assignment Instructions
+
+**File to create:** `module_09/searching_sorting.py`
+
+You will implement two search algorithms and four sort algorithms, then benchmark them against each other. Follow each step in order.
+
+---
+
+### Step 1 — `linear_search(arr, target)`
+
+Return the **index** of `target` in `arr`, or `-1` if not found. Scan from left to right.
+
+```python
+print(linear_search([5, 3, 8, 1, 9], 8))   # 2
+print(linear_search([5, 3, 8, 1, 9], 7))   # -1
+```
+
+---
+
+### Step 2 — `binary_search(arr, target)`
+
+Return the **index** of `target` in the **sorted** list `arr`, or `-1` if not found.
+
+```python
+sorted_arr = [1, 3, 5, 7, 9, 11, 13]
+print(binary_search(sorted_arr, 7))    # 3
+print(binary_search(sorted_arr, 6))    # -1
+print(binary_search(sorted_arr, 1))    # 0
+print(binary_search(sorted_arr, 13))   # 6
+```
+
+---
+
+### Step 3 — `bubble_sort(arr)`
+
+Return a **sorted copy** of `arr` using bubble sort. Do not modify the original list.
+
+```python
+print(bubble_sort([64, 34, 25, 12, 22, 11, 90]))
+# [11, 12, 22, 25, 34, 64, 90]
+```
+
+---
+
+### Step 4 — `selection_sort(arr)`
+
+Return a **sorted copy** of `arr` using selection sort.
+
+```python
+print(selection_sort([29, 10, 14, 37, 13]))
+# [10, 13, 14, 29, 37]
+```
+
+---
+
+### Step 5 — `merge_sort(arr)`
+
+Return a **sorted copy** of `arr` using merge sort. You need two functions: `merge_sort()` (recursive) and a helper `merge(left, right)`.
+
+```python
+print(merge_sort([38, 27, 43, 3, 9, 82, 10]))
+# [3, 9, 10, 27, 38, 43, 82]
+```
+
+Test `merge()` separately first:
+```python
+print(merge([1, 3, 5], [2, 4, 6]))   # [1, 2, 3, 4, 5, 6]
+```
+
+---
+
+### Step 6 — `quick_sort(arr)`
+
+Return a **sorted copy** of `arr` using quick sort. Use the middle element as the pivot.
+
+```python
+print(quick_sort([10, 80, 30, 90, 40, 50, 70]))
+# [10, 30, 40, 50, 70, 80, 90]
+```
+
+---
+
+### Step 7 — Verify all sorts produce the same result
+
+Add a block at the bottom of your file that verifies all four sort functions produce identical output:
+
+```python
+import random
+test_list = random.sample(range(1000), 20)   # 20 random numbers
+
+b = bubble_sort(test_list)
+s = selection_sort(test_list)
+m = merge_sort(test_list)
+q = quick_sort(test_list)
+
+assert b == s == m == q == sorted(test_list), "Sorting mismatch!"
+print("All four sorts agree:", b)
+```
+
+---
+
+### Step 8 — Benchmark bubble sort vs. merge sort
+
+Time both algorithms on a list of 2000 random integers and print the results:
+
+```python
+import time, random
+
+big = random.sample(range(100_000), 2000)
+
+start = time.time()
+bubble_sort(big)
+print(f"Bubble sort:  {time.time() - start:.4f}s")
+
+start = time.time()
+merge_sort(big)
+print(f"Merge sort:   {time.time() - start:.4f}s")
+```
+
+In a comment, write one sentence explaining the speed difference you observe.
+
+---
+
+### Step 9 — Search demo
+
+Using the list `[2, 5, 8, 12, 16, 23, 38, 56, 72, 91]`:
+
+1. Use `linear_search` to find `23` and `99`. Print the results.
+2. Use `binary_search` to find `23` and `99`. Print the results.
+3. In a comment, state which search is faster for this list and why.
+
+---
+
+### Checklist Before Submitting
+
+- [ ] `linear_search` returns the correct index or `-1`.
+- [ ] `binary_search` returns the correct index or `-1`; works only on sorted input.
+- [ ] `bubble_sort`, `selection_sort`, `merge_sort`, `quick_sort` all return sorted copies without modifying the input.
+- [ ] The `merge()` helper is implemented and tested separately.
+- [ ] The assertion block passes (all four sorts agree with `sorted()`).
+- [ ] The benchmark prints times for both bubble sort and merge sort.
+- [ ] A comment explains the observed speed difference.
+- [ ] The search demo prints results for both algorithms.

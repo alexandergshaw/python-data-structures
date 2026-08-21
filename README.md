@@ -121,12 +121,12 @@ python-data-structures/
     ├── module_08/             ← Week 8: Recursion
     ├── module_09/             ← Week 9: Searching and Sorting
     ├── module_10/             ← Week 10: Trees
-    ├── module 11/             ← Week 11: Heaps and Priority Queues
-    ├── module 12/             ← Week 12: Hash Tables
-    ├── module 13/             ← Week 13: Graphs
-    ├── module 14/             ← Week 14: Algorithmic Paradigms
-    ├── module 15/             ← Week 15: Dynamic Programming
-    └── module 16/             ← Week 16: Final Capstone
+    ├── module_11/             ← Week 11: Heaps and Priority Queues
+    ├── module_12/             ← Week 12: Hash Tables
+    ├── module_13/             ← Week 13: Graphs
+    ├── module_14/             ← Week 14: Algorithmic Paradigms
+    ├── module_15/             ← Week 15: Dynamic Programming
+    └── module_16/             ← Week 16: Final Capstone
 ```
 
 Each module folder contains a `README.md` with a detailed introduction to that week's concepts, examples, and hints to help you complete the assignment.

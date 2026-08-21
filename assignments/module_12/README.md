@@ -140,3 +140,152 @@ def put(self, key, value):
 - For linear probing, be careful to handle the case where the table is full (all slots occupied) — add a guard or resize before inserting.
 - Test thoroughly: insert duplicate keys (should update, not add), retrieve missing keys (should raise `KeyError` or return a default), and delete then re-insert.
 - Python's built-in `hash()` function can return negative numbers — always `% self.size` to get a valid positive index.
+
+---
+
+## Assignment Instructions
+
+**File to create:** `module_12/hash_table.py`
+
+You will implement two versions of a hash table — one using separate chaining and one using linear probing — and compare them. Work through each step in order.
+
+---
+
+### Step 1 — `HashTableChaining` skeleton
+
+Create a class `HashTableChaining` with:
+- `self.size = 16` (default bucket count)
+- `self.buckets = [[] for _ in range(self.size)]` — list of empty lists
+- `self.count = 0` — number of stored key-value pairs
+- `_hash(key)` — returns `hash(key) % self.size`
+
+---
+
+### Step 2 — `put(key, value)`
+
+Insert or update a key-value pair:
+1. Hash the key to find the bucket index.
+2. Search the bucket list for an existing pair with the same key.
+   - If found, **update** its value.
+   - If not found, **append** `[key, value]` to the bucket and increment `self.count`.
+
+```python
+t = HashTableChaining()
+t.put("name", "Alice")
+t.put("age", 20)
+t.put("name", "Bob")   # Update existing key
+```
+
+---
+
+### Step 3 — `get(key)`
+
+Search the correct bucket for a pair whose first element equals `key`. Return its value. Raise `KeyError(key)` if not found.
+
+```python
+print(t.get("name"))   # Bob
+print(t.get("age"))    # 20
+# t.get("gpa") → KeyError: 'gpa'
+```
+
+---
+
+### Step 4 — `delete(key)`
+
+Remove the pair with the given key from its bucket. Decrement `self.count`. Do nothing if the key is not found.
+
+```python
+t.delete("age")
+# t.get("age") → KeyError
+```
+
+---
+
+### Step 5 — `__str__()` and `load_factor()`
+
+Add:
+- `load_factor()` returning `self.count / self.size` (as a float)
+- `__str__()` returning a readable summary showing non-empty buckets:
+
+```
+HashTable (16 buckets, 3 items, load=0.19):
+  Bucket 2: [['city', 'NYC']]
+  Bucket 7: [['name', 'Bob']]
+  Bucket 11: [['score', 95]]
+```
+
+---
+
+### Step 6 — `HashTableProbing` with linear probing
+
+Create a **second class** `HashTableProbing` that stores entries in a flat array using linear probing.
+
+Use a sentinel object `_EMPTY = object()` and `_DELETED = object()` to distinguish empty slots from deleted ones.
+
+Implement:
+- `put(key, value)` — find the slot (probe forward on collision), insert or update.
+- `get(key)` — probe forward; skip `_DELETED` slots; raise `KeyError` if an `_EMPTY` slot is hit.
+- `delete(key)` — find the slot and mark it `_DELETED` (tombstone).
+
+```python
+p = HashTableProbing(size=8)
+p.put("a", 1)
+p.put("b", 2)
+p.put("c", 3)
+print(p.get("b"))   # 2
+p.delete("b")
+# p.get("b") → KeyError
+print(p.get("c"))   # 3  — probing still finds c correctly after b is deleted
+```
+
+---
+
+### Step 7 — Collision demonstration
+
+Show that your chaining implementation handles collisions gracefully:
+
+1. Find two strings that hash to the same bucket in a size-8 table (trial-and-error is fine).
+2. Insert both. Print the table to show both are stored in the same bucket.
+3. Retrieve both and verify the correct values come back.
+
+```python
+# Example — find two keys that collide:
+size = 8
+keys = ["cat", "dog", "ant", "bee", "emu", "gnu", "hen", "jay", "koi"]
+for k in keys:
+    print(f"{k!r:8} → bucket {hash(k) % size}")
+```
+
+---
+
+### Step 8 — Functional comparison
+
+Run both hash table implementations with the same data and verify they return identical results:
+
+```python
+data = [("apple", 1), ("banana", 2), ("cherry", 3), ("date", 4), ("elderberry", 5)]
+
+chain = HashTableChaining()
+probe = HashTableProbing()
+for k, v in data:
+    chain.put(k, v)
+    probe.put(k, v)
+
+for k, _ in data:
+    assert chain.get(k) == probe.get(k), f"Mismatch on key {k!r}"
+
+print("Both implementations agree on all keys.")
+```
+
+---
+
+### Checklist Before Submitting
+
+- [ ] `HashTableChaining.put()` inserts new keys and updates existing ones.
+- [ ] `HashTableChaining.get()` raises `KeyError` for missing keys.
+- [ ] `HashTableChaining.delete()` removes the key; subsequent `get()` raises `KeyError`.
+- [ ] `load_factor()` returns the correct float.
+- [ ] `__str__()` shows non-empty buckets with their contents.
+- [ ] `HashTableProbing` handles tombstone deletion correctly (`get()` still finds later keys).
+- [ ] The collision demonstration shows two keys sharing a bucket.
+- [ ] The comparison assertion passes for both implementations.

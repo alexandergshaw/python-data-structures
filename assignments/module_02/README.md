@@ -146,3 +146,103 @@ for i in range(10):
 - **Avoid deeply nested `if` statements.** If you find yourself indenting 4+ levels, step back and think about whether `elif` or a different structure would be cleaner.
 - For input validation loops, remember that the code inside the loop runs **after** the first attempt, so you often need to get the input once before the loop and again inside the loop — or use a `while True:` loop with a `break`.
 - `break` and `continue` are powerful but can make code hard to follow — use them only when they make the logic clearer.
+
+---
+
+## Assignment Instructions
+
+**File to create:** `module_02/control_flow.py`
+
+You will write a grade-report program that validates input, classifies scores, and prints statistics. Complete each step in order.
+
+---
+
+### Step 1 — Collect a valid number of students
+
+Ask the user how many students are in the class. The number must be between 1 and 50 (inclusive). Keep asking until they enter a valid number.
+
+```
+How many students? -3
+Invalid. Enter a number between 1 and 50: 0
+Invalid. Enter a number between 1 and 50: 5
+```
+
+**Hint:** Use a `while` loop that checks `count < 1 or count > 50`.
+
+---
+
+### Step 2 — Collect a score for each student
+
+Use a `for` loop that runs exactly `count` times. Inside the loop, ask for a score between 0 and 100. Validate each score with a `while` loop before accepting it.
+
+```
+Enter score for student 1 (0-100): 150
+Invalid score. Try again: 85
+Enter score for student 2 (0-100): 92
+...
+```
+
+Store all valid scores in a list called `scores`.
+
+---
+
+### Step 3 — Skip incomplete scores with `continue`
+
+Before storing a score, check if it is exactly `-1`. If it is, print `"Skipping student X"` and use `continue` to move to the next student without adding anything to `scores`. (This simulates a student who didn't take the test.)
+
+> Note: `-1` should bypass the 0–100 validation — handle it before the validation loop.
+
+---
+
+### Step 4 — Stop early with `break`
+
+Add a secret exit: if the user enters `999`, print `"Early exit triggered."` and use `break` to stop collecting scores immediately.
+
+---
+
+### Step 5 — Print a letter grade for each score
+
+After collecting all scores, loop through `scores` and print a line for each one:
+
+```
+Student 1: 85 → B
+Student 2: 92 → A
+Student 3: 74 → C
+```
+
+Use this grading scale:
+- 90–100 → `A`
+- 80–89 → `B`
+- 70–79 → `C`
+- 60–69 → `D`
+- Below 60 → `F`
+
+---
+
+### Step 6 — Print class statistics
+
+After the grade list, print:
+- The **highest** score (use Python's built-in `max()`)
+- The **lowest** score (use `min()`)
+- The **average** score (sum divided by count — use `sum()` and `len()`)
+- The number of students who **passed** (score ≥ 60) and **failed**
+
+```
+--- Class Statistics ---
+Highest: 95
+Lowest: 42
+Average: 76.40
+Passed: 8 | Failed: 2
+```
+
+---
+
+### Checklist Before Submitting
+
+- [ ] Student count is validated (1–50, re-prompts on bad input).
+- [ ] Each score is validated (0–100, re-prompts on bad input).
+- [ ] `-1` skips the student using `continue`.
+- [ ] `999` exits the input loop early using `break`.
+- [ ] A letter grade is printed for every score using `if / elif / else`.
+- [ ] Statistics (highest, lowest, average, pass/fail count) are printed correctly.
+- [ ] The average is formatted to 2 decimal places.

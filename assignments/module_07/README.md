@@ -154,3 +154,145 @@ print(is_balanced("({[})"))    # False
 - Use `collections.deque` for a queue — it gives you O(1) at both ends.
 - For balanced brackets, trace through a small example by hand before coding: `"([)]"` should return `False` because the close order is wrong.
 - The difference between LIFO and FIFO is the whole point — draw a diagram if you're confused about which end to add/remove from.
+
+---
+
+## Assignment Instructions
+
+**File to create:** `module_07/stacks_queues.py`
+
+You will implement a `Stack` class, a `Queue` class, and two real-world applications. Work through each step in order.
+
+---
+
+### Step 1 — Implement the `Stack` class
+
+Your `Stack` must support these methods:
+
+| Method            | What it does                                          |
+|-------------------|-------------------------------------------------------|
+| `push(value)`     | Add `value` to the top of the stack                   |
+| `pop()`           | Remove and return the top value; raise `IndexError` if empty |
+| `peek()`          | Return the top value without removing it; raise `IndexError` if empty |
+| `is_empty()`      | Return `True` if the stack has no items               |
+| `size()`          | Return the number of items                            |
+| `__str__()`       | Return a string like `"Stack (top → bottom): [3, 2, 1]"` |
+
+Test it:
+```python
+s = Stack()
+s.push(1)
+s.push(2)
+s.push(3)
+print(s)          # Stack (top → bottom): [3, 2, 1]
+print(s.pop())    # 3
+print(s.peek())   # 2
+print(s.size())   # 2
+```
+
+---
+
+### Step 2 — Implement the `Queue` class
+
+Use `collections.deque` internally. Your `Queue` must support:
+
+| Method            | What it does                                          |
+|-------------------|-------------------------------------------------------|
+| `enqueue(value)`  | Add `value` to the back of the queue                  |
+| `dequeue()`       | Remove and return the front value; raise `IndexError` if empty |
+| `front()`         | Return the front value without removing it; raise `IndexError` if empty |
+| `is_empty()`      | Return `True` if the queue has no items               |
+| `size()`          | Return the number of items                            |
+| `__str__()`       | Return a string like `"Queue (front → back): [1, 2, 3]"` |
+
+Test it:
+```python
+q = Queue()
+q.enqueue("Alice")
+q.enqueue("Bob")
+q.enqueue("Carol")
+print(q)              # Queue (front → back): [Alice, Bob, Carol]
+print(q.dequeue())    # Alice
+print(q.front())      # Bob
+print(q.size())       # 2
+```
+
+---
+
+### Step 3 — Application 1: Balanced bracket checker
+
+Write a function `is_balanced(s)` that uses your `Stack` to check whether every opening bracket in the string `s` has a matching closing bracket in the correct order.
+
+Return `True` if balanced, `False` if not.
+
+Rules:
+- `(` matches `)`
+- `[` matches `]`
+- `{` matches `}`
+- Ignore any character that is not a bracket.
+
+Test cases you must verify:
+```python
+print(is_balanced("({[]})"))     # True
+print(is_balanced("{[()]}"))     # True
+print(is_balanced("({[})"))      # False — wrong order
+print(is_balanced("((())"))      # False — missing closing
+print(is_balanced("hello()[]"))  # True — non-brackets ignored
+print(is_balanced(""))           # True — empty string
+```
+
+---
+
+### Step 4 — Application 2: Print queue simulator
+
+Write a function `print_queue_demo()` that simulates a printer queue:
+
+1. Create a `Queue` and enqueue at least 5 print jobs (strings like `"Report.pdf"`, `"Photo.png"`, etc.).
+2. Print the full queue.
+3. Process (dequeue) jobs one at a time in a loop. For each job, print `"Printing: <job>"`.
+4. After all jobs are processed, confirm the queue is empty.
+
+```
+Queue (front → back): [Report.pdf, Photo.png, Letter.docx, Invoice.pdf, Notes.txt]
+Printing: Report.pdf
+Printing: Photo.png
+Printing: Letter.docx
+Printing: Invoice.pdf
+Printing: Notes.txt
+All jobs complete. Queue empty: True
+```
+
+---
+
+### Step 5 — Application 3: Undo / Redo with two stacks
+
+Write a simple text-editing simulator that supports undo using two stacks: `undo_stack` and `redo_stack`.
+
+Implement these three functions (use your `Stack` class):
+
+- `do_action(action, undo_stack, redo_stack)` — push `action` onto `undo_stack`; clear `redo_stack` (new actions invalidate redo history).
+- `undo(undo_stack, redo_stack)` — pop from `undo_stack`, push onto `redo_stack`, return the undone action (or `None` if empty).
+- `redo(undo_stack, redo_stack)` — pop from `redo_stack`, push back onto `undo_stack`, return the redone action (or `None` if empty).
+
+Demo:
+```python
+undo_s, redo_s = Stack(), Stack()
+do_action("Type 'Hello'", undo_s, redo_s)
+do_action("Bold text", undo_s, redo_s)
+do_action("Insert image", undo_s, redo_s)
+print("Undo:", undo("Insert image"))    # Undo: Insert image
+print("Undo:", undo("Bold text"))       # Undo: Bold text
+print("Redo:", redo("Bold text"))       # Redo: Bold text
+```
+
+---
+
+### Checklist Before Submitting
+
+- [ ] `Stack` with `push`, `pop`, `peek`, `is_empty`, `size`, `__str__`.
+- [ ] `pop()` and `peek()` raise `IndexError` on an empty stack.
+- [ ] `Queue` (using `deque`) with `enqueue`, `dequeue`, `front`, `is_empty`, `size`, `__str__`.
+- [ ] `dequeue()` and `front()` raise `IndexError` on an empty queue.
+- [ ] `is_balanced()` passes all six test cases above.
+- [ ] Print queue demo runs end-to-end and shows all jobs processed.
+- [ ] Undo/redo demo shows correct behavior for undo and redo actions.

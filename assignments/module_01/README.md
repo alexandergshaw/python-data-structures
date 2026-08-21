@@ -130,3 +130,96 @@ The `:.2f` format specifier rounds to 2 decimal places.
 - **Read error messages.** Python tells you the line number and what went wrong. `TypeError` usually means a type mismatch; `NameError` means you used a variable before creating it.
 - **Test with different inputs.** Try zero, negative numbers, and very large numbers to make sure your program handles them.
 - Remember: `input()` returns a **string**. If your program does math, you must wrap it in `int()` or `float()`.
+
+---
+
+## Assignment Instructions
+
+**File to create:** `module_01/basics.py`
+
+You will write a program that collects information about a person and prints a formatted summary. Follow the numbered steps below exactly — each step builds on the one before it.
+
+### Step 1 — Collect the user's name
+
+Use `input()` to ask the user to type their name. Store it in a variable called `name`.
+
+```
+What is your name? Alex
+```
+
+Run your file (`python3 basics.py`) and make sure you see the prompt.
+
+---
+
+### Step 2 — Collect the user's age
+
+Ask the user to type their age. Remember: `input()` always gives you a string. Convert it to an **integer** using `int()` and store it in a variable called `age`.
+
+```
+How old are you? 20
+```
+
+> If you forget `int()` and try to do math with `age` later, Python will raise a `TypeError`. Test this on purpose so you understand the error.
+
+---
+
+### Step 3 — Collect the user's GPA
+
+Ask the user for their GPA. Convert it to a **float** and store it in `gpa`.
+
+```
+What is your GPA? 3.75
+```
+
+---
+
+### Step 4 — Calculate the year they were born
+
+Use the current year (2026) minus their age to estimate their birth year. Store the result in a variable called `birth_year`.
+
+```python
+birth_year = 2026 - age
+```
+
+---
+
+### Step 5 — Print a formatted summary
+
+Use an **f-string** to print all the information on one or more lines. Your output should look exactly like this (with the user's actual values filled in):
+
+```
+--- Student Profile ---
+Name: Alex
+Age: 20
+Approximate birth year: 2006
+GPA: 3.75
+```
+
+Requirements:
+- The header `--- Student Profile ---` must appear on its own line.
+- GPA must be printed with **exactly 2 decimal places** (use `:.2f` in your f-string).
+
+---
+
+### Step 6 — Add a letter-grade label
+
+After the profile, print a one-line message that describes the GPA in plain English:
+
+- GPA 3.5 and above → `"GPA status: Excellent"`
+- GPA 3.0 to 3.49 → `"GPA status: Good"`
+- GPA 2.0 to 2.99 → `"GPA status: Satisfactory"`
+- Below 2.0 → `"GPA status: Needs improvement"`
+
+Use an `if / elif / else` statement (we will cover these formally next week, but give it a try using the concept section above as a guide).
+
+---
+
+### Checklist Before Submitting
+
+- [ ] The program runs without errors from start to finish.
+- [ ] `input()` is used for name, age, and GPA.
+- [ ] Age is stored as an `int`; GPA is stored as a `float`.
+- [ ] Birth year is calculated correctly.
+- [ ] The output matches the expected format (header, all four fields, GPA status).
+- [ ] GPA is printed to 2 decimal places.
+- [ ] You tested with at least two different sets of inputs.
