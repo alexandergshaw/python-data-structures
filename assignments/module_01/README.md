@@ -278,7 +278,7 @@ Run your program at least three times with different answers and make sure:
 
 Testing just means **running your program and checking that it does what you expect**. You don't need any special tools — you already have everything you need. Follow along slowly; nothing here is scary.
 
-### Part A — Open a terminal in the right place
+### Step 1 — Open a terminal and run the program
 
 The **terminal** (also called the "command line") is a text window where you type commands to your computer. Think of it as texting your computer instead of clicking buttons.
 
@@ -286,33 +286,26 @@ The **terminal** (also called the "command line") is a text window where you typ
    - **VS Code:** click the menu `Terminal` → `New Terminal`. A panel opens at the bottom.
    - **Mac:** open the `Terminal` app (press `Cmd + Space`, type "Terminal", press Enter).
    - **Windows:** open `PowerShell` or `Command Prompt` from the Start menu.
-2. You need to be "inside" the folder that contains your file. Moving between folders is done with the `cd` command (`cd` stands for "change directory"). Type this and press Enter:
+2. Move "inside" the folder that contains your file. `cd` stands for "change directory." Type this and press Enter:
 
    ```
    cd assignments/module_01
    ```
 
-3. Confirm your `basics.py` file is really there. Type this and press Enter:
-   - **Mac/Linux:** `ls`
-   - **Windows:** `dir`
+   Not sure you're in the right place? Type `ls` (Mac/Linux) or `dir` (Windows) — you should see `basics.py` listed. If not, type `cd ..` to go up one folder and try again.
+3. Run the program by typing this exactly and pressing Enter:
 
-   You should see `basics.py` in the list. If you don't, you are in the wrong folder — use `cd ..` to go back up one level and try again. (`cd ..` means "go up to the folder above me.")
+   ```
+   python3 basics.py
+   ```
 
-### Part B — Run the program
+   > **If `python3` says "command not found," try `python basics.py` instead.** On some Windows setups the command is just `python`.
 
-Type this exactly and press Enter:
+   The program starts and asks its first question. **The cursor will sit there blinking** — that's normal. It's waiting for you to type an answer and press Enter.
 
-```
-python3 basics.py
-```
+### Step 2 — Answer the questions and check the output
 
-> **If `python3` gives a "command not found" error, try `python basics.py` instead.** On some Windows setups the command is just `python`.
-
-The program should now start and ask you its first question. **The cursor will sit there blinking, waiting for you.** That is normal — it is waiting for you to type an answer and press Enter.
-
-### Part C — Answer the questions
-
-Type an answer to each question and press Enter after each one. For your very first run, use these exact values so you can predict the result:
+Type an answer to each question and press Enter after each one. For your first run, use these exact values so you can predict the result:
 
 | Question | Type this |
 |----------|-----------|
@@ -320,9 +313,7 @@ Type an answer to each question and press Enter after each one. For your very fi
 | Age | `20` |
 | GPA | `3.75` |
 
-### Part D — Check the output against the expected result
-
-After you answer all three questions, your program should print **exactly** this (assuming the current year in Step 4 is 2026):
+After you answer all three, your program should print **exactly** this (assuming the current year in Step 4 is 2026):
 
 ```
 --- Student Profile ---
@@ -339,11 +330,9 @@ Compare your output to this line by line, like a spot-the-difference puzzle:
 - Does the GPA show **two** digits after the dot (`3.75`)?
 - Did the status say `Excellent` (because `3.75` is 3.5 or higher)?
 
-If every line matches, that part works. 🎉
+If every line matches, it works. 🎉
 
-### Part E — Test the GPA status ranges on purpose
-
-The GPA status message has **four** possible answers, and you must check that each one shows up. Run the program four separate times. Each time, type the same name and age, but change the GPA to the value in the table below and confirm you get the matching status:
+**Now test all four GPA statuses on purpose.** Run the program again for each row below, keeping the same name and age but changing only the GPA, and confirm you get the matching status line:
 
 | Type this GPA | Expected status line |
 |---------------|----------------------|
@@ -352,13 +341,11 @@ The GPA status message has **four** possible answers, and you must check that ea
 | `2.5` | `GPA status: Satisfactory` |
 | `1.4` | `GPA status: Needs improvement` |
 
-This is called **testing the boundaries** — making sure every branch of your `if / elif / else` actually works, not just the first one.
+**Bonus edge cases:** type exactly `3.5` (should be `Excellent`, not `Good`) and exactly `3.0` (should be `Good`, not `Satisfactory`). Values right on the line are where mistakes hide.
 
-**Bonus edge cases** (try these to be thorough): type exactly `3.5` (should be `Excellent`, not `Good`) and exactly `3.0` (should be `Good`, not `Satisfactory`). Values that sit right on the line are where mistakes hide.
+### Step 3 — Fix any errors and do a final check
 
-### Part F — What to do when something goes wrong
-
-Errors are normal and expected — even professional programmers see them constantly. When Python hits a problem it prints a **red error message** (called a "traceback"). Don't panic. Read it from the **bottom up** — the last line usually tells you what went wrong.
+Errors are normal — even professional programmers see them constantly. When Python hits a problem it prints a **red error message** (a "traceback"). Don't panic. Read it from the **bottom up** — the last line usually tells you what went wrong.
 
 | What you see | What it usually means | How to fix it |
 |--------------|-----------------------|---------------|
@@ -368,17 +355,13 @@ Errors are normal and expected — even professional programmers see them consta
 | `SyntaxError` | A typo like a missing quote, colon, or parenthesis | Look at the line number Python points to and check for a missing `"`, `:`, or `)` |
 | Program never stops / no output | It is still waiting for you to type an answer | Click the terminal, type an answer, press Enter |
 
-After you fix the code, **save the file** and run `python3 basics.py` again. Testing is a loop: run → check → fix → run again. Repeat until every run is clean.
-
-### Part G — Final confidence check
-
-Before you move on, run the program **one last time** from top to bottom and confirm:
+After you fix the code, **save the file** and run `python3 basics.py` again. Testing is a loop: run → check → fix → run again. Repeat until a full run is clean and all four of these are true:
 - It starts, asks all three questions, and never crashes.
 - The birth-year math is correct for the age you typed.
 - The GPA always prints with exactly two decimals.
 - The status line matches the GPA you entered.
 
-If all four are true, your program is working and you are ready to submit. Use the checklist below as your final sign-off.
+If all four are true, your program is working and you're ready to submit. Use the checklist below as your final sign-off.
 
 ---
 
