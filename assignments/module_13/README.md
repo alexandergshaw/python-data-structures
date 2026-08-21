@@ -1,52 +1,72 @@
 # Week 13 — Graphs
-
-A **graph** is a collection of **nodes** (vertices) connected by **edges**. Graphs are the most general data structure you've seen — trees, linked lists, and even simple key-value maps are all special cases. They model networks, maps, social connections, dependencies, and much more.
+### Representations, BFS, DFS, Shortest Path, and Minimum Spanning Trees
 
 ---
 
-## Concepts Covered
+## Welcome!
 
-### 1. Graph Representations
+Every data structure you've seen so far has been somewhat linear or tree-like. **Graphs** are the most general structure of all — they can model anything where things are connected to other things: social networks, road maps, airline routes, the internet, power grids, and more.
 
-#### Adjacency List
+This is also one of the most exciting weeks because the algorithms you write here — BFS, DFS, Dijkstra's — are used in Google Maps, Facebook friend suggestions, and GPS systems.
 
-Each node maps to a list of its neighbors. This is the most common representation.
+---
+
+## Concept 1: What Is a Graph?
+
+A graph has:
+- **Vertices (nodes)** — the things (cities, people, web pages, buildings)
+- **Edges** — the connections between them (roads, friendships, links)
+
+**Analogy:** A road map is a graph. Cities are vertices. Roads connecting them are edges. If a road goes both ways, it's an **undirected** edge. A one-way street is a **directed** edge.
+
+```
+    A ——4—— B
+    |       |
+    2       5
+    |       |
+    C ——1—— D ——3—— E
+```
+
+Here, edges have **weights** (the numbers) — think of them as distances or travel times.
+
+---
+
+## Concept 2: Representing a Graph in Code
+
+### Adjacency List (Most Common)
+
+Each node maps to a list of its neighbors (and optional weights):
 
 ```python
 graph = {
-    'A': ['B', 'C'],
-    'B': ['A', 'D'],
-    'C': ['A', 'D'],
-    'D': ['B', 'C', 'E'],
-    'E': ['D']
+    "A": [("B", 4), ("C", 2)],
+    "B": [("A", 4), ("D", 5)],
+    "C": [("A", 2), ("D", 1)],
+    "D": [("B", 5), ("C", 1), ("E", 3)],
+    "E": [("D", 3)]
 }
 ```
 
-- Space: O(V + E) where V = vertices, E = edges.
-- Best for **sparse** graphs (few edges relative to nodes).
+Reading this: `"A": [("B", 4), ("C", 2)]` means A is connected to B (cost 4) and C (cost 2).
 
-#### Adjacency Matrix
-
-A 2D array where `matrix[i][j] = 1` if there is an edge from node `i` to node `j`.
-
-```python
-# 0-indexed, 4 nodes
-matrix = [
-    [0, 1, 1, 0],  # node 0 connects to 1 and 2
-    [1, 0, 0, 1],  # node 1 connects to 0 and 3
-    [1, 0, 0, 1],  # node 2 connects to 0 and 3
-    [0, 1, 1, 0],  # node 3 connects to 1 and 2
-]
-```
-
-- Space: O(V²).
-- Best for **dense** graphs and when you need O(1) edge lookup.
+- Space: O(vertices + edges) — efficient for sparse graphs (few edges)
+- Easy to iterate over neighbors
 
 ---
 
-### 2. Breadth-First Search (BFS)
+## Concept 3: BFS — Breadth-First Search
 
-Explore all neighbors of the current node before going deeper. Uses a **queue** (FIFO).
+BFS explores the graph **level by level** — all neighbors of the starting point first, then their neighbors, then their neighbors' neighbors, etc.
+
+**Analogy:** You drop a stone in a pond. The ripples spread outward in rings — the closest water moves first, then the next ring, then the next. BFS is like those ripples through a graph.
+
+**What it's good for:** Finding the shortest path in an **unweighted** graph (fewest edges, not lowest total weight).
+
+**How it works:**
+1. Start at the source node. Mark it visited.
+2. Add it to a queue (FIFO).
+3. Dequeue a node. Visit all its unvisited neighbors. Mark them visited and add them to the queue.
+4. Repeat until the queue is empty.
 
 ```python
 from collections import deque
@@ -60,75 +80,69 @@ def bfs(graph, start):
     while queue:
         node = queue.popleft()
         order.append(node)
-        for neighbor in graph[node]:
+        for neighbor, weight in graph[node]:
             if neighbor not in visited:
                 visited.add(neighbor)
                 queue.append(neighbor)
     return order
 ```
 
-- Finds the **shortest path** (fewest edges) in an unweighted graph.
-- Time complexity: **O(V + E)**.
-
 ---
 
-### 3. Depth-First Search (DFS)
+## Concept 4: DFS — Depth-First Search
 
-Go as deep as possible along one path before backtracking. Uses a **stack** (or recursion).
+DFS goes as **deep** as possible along one path before backtracking and trying another path.
+
+**Analogy:** You're exploring a cave system. You pick one tunnel and follow it all the way to the end (or a dead end). Then you backtrack and try the next tunnel.
 
 ```python
 def dfs(graph, start, visited=None):
     if visited is None:
         visited = set()
     visited.add(start)
-    for neighbor in graph[start]:
+    result = [start]
+    for neighbor, weight in graph[start]:
         if neighbor not in visited:
-            dfs(graph, neighbor, visited)
-    return visited
+            result.extend(dfs(graph, neighbor, visited))
+    return result
 ```
 
-- Useful for detecting cycles, topological sorting, and maze solving.
-- Time complexity: **O(V + E)**.
+**BFS vs. DFS:**
+- BFS finds the shortest path (by number of edges) — use a queue
+- DFS is great for detecting cycles, exploring all paths — uses recursion (or a stack)
 
 ---
 
-### 4. Connected Components
+## Concept 5: Connected Components
 
-A **connected component** is a group of nodes where every node is reachable from every other node in the group.
+A **connected component** is a group of nodes where you can get from any one to any other by following edges. If you can't get from A to B at all, they're in different components.
+
+**Analogy:** Imagine islands. All the cities on one island form a connected component. You can't drive to a different island.
 
 ```python
 def connected_components(graph):
     visited = set()
     components = []
-
     for node in graph:
         if node not in visited:
             component = dfs(graph, node, visited)
-            components.append(component)
-
+            components.append(set(component))
     return components
 ```
 
 ---
 
-### 5. Weighted Graphs
+## Concept 6: Dijkstra's Shortest Path
 
-Edges can carry **weights** (distances, costs, times). Represent with a list of `(neighbor, weight)` tuples:
+What if edges have weights (distances, times, costs)? BFS no longer works because it counts edges, not total cost. **Dijkstra's algorithm** finds the path with the lowest total weight.
 
-```python
-weighted_graph = {
-    'A': [('B', 4), ('C', 2)],
-    'B': [('A', 4), ('D', 5)],
-    'C': [('A', 2), ('D', 1)],
-    'D': [('B', 5), ('C', 1)]
-}
-```
+**Analogy:** Google Maps finding the fastest route. Not the route with fewest turns (BFS), but the one with the shortest total drive time (Dijkstra's).
 
----
-
-### 6. Dijkstra's Shortest-Path Algorithm
-
-Find the shortest path from a source node to all other nodes in a weighted graph.
+**How it works:**
+1. Start with distance 0 to the source, infinity to everywhere else
+2. Use a min-heap (priority queue) ordered by current known distance
+3. Each time you process a node, check if going through it gives a shorter path to any of its neighbors
+4. If yes, update the distance and add the neighbor to the heap
 
 ```python
 import heapq
@@ -141,7 +155,7 @@ def dijkstra(graph, start):
     while heap:
         dist, node = heapq.heappop(heap)
         if dist > distances[node]:
-            continue    # Already found a shorter path
+            continue    # Already found a better path to this node
         for neighbor, weight in graph[node]:
             new_dist = dist + weight
             if new_dist < distances[neighbor]:
@@ -151,44 +165,8 @@ def dijkstra(graph, start):
     return distances
 ```
 
-- Time complexity: **O((V + E) log V)** with a min-heap.
-- Does **not** work with negative edge weights.
-
----
-
-### 7. Prim's Minimum Spanning Tree
-
-Find the minimum set of edges that connects all nodes with the smallest total weight.
-
-```python
-def prims(graph, start):
-    visited = {start}
-    edges = [(weight, start, neighbor)
-             for neighbor, weight in graph[start]]
-    heapq.heapify(edges)
-    mst = []
-
-    while edges:
-        weight, u, v = heapq.heappop(edges)
-        if v not in visited:
-            visited.add(v)
-            mst.append((u, v, weight))
-            for neighbor, w in graph[v]:
-                if neighbor not in visited:
-                    heapq.heappush(edges, (w, v, neighbor))
-    return mst
-```
-
----
-
-## Hints for This Week's Assignment
-
-- **Always track visited nodes** in BFS and DFS — without a `visited` set, you'll loop forever in graphs with cycles.
-- BFS uses a **queue** (FIFO); DFS uses a **stack** or recursion. Mix these up and your traversal order will be wrong.
-- Draw small graphs by hand and trace through BFS/DFS manually before running your code.
-- Dijkstra's algorithm processes nodes in order of their current known distance — the min-heap takes care of this automatically.
-- For Prim's MST, the number of edges in the result is always V − 1 (where V is the number of nodes). Use this to verify your result.
-- Start with the adjacency list representation — it's easier to read and write than matrices.
+For the example graph, starting at A:
+- A→C = 2, A→C→D = 3, A→B = 4, A→C→D→E = 6
 
 ---
 
@@ -196,18 +174,33 @@ def prims(graph, start):
 
 **File to create:** `module_13/graph.py`
 
-You will implement a `Graph` class with BFS, DFS, connected components, and Dijkstra's shortest path. Work through each step in order.
-
 ---
 
-### Step 1 — `Graph` class skeleton
+### Step 1 — `Graph` class
 
-Create a `Graph` class with:
-- `self.adjacency_list = {}` — dictionary mapping each node to a list of `(neighbor, weight)` tuples.
-- `add_vertex(v)` — add `v` as a key with an empty list if it doesn't already exist.
-- `add_edge(u, v, weight=1)` — add an undirected edge between `u` and `v` with the given weight. Call `add_vertex` for both nodes first.
-- `__str__()` — print each vertex and its neighbors.
+```python
+class Graph:
+    def __init__(self):
+        self.adjacency_list = {}
 
+    def add_vertex(self, v):
+        if v not in self.adjacency_list:
+            self.adjacency_list[v] = []
+
+    def add_edge(self, u, v, weight=1):
+        self.add_vertex(u)
+        self.add_vertex(v)
+        self.adjacency_list[u].append((v, weight))
+        self.adjacency_list[v].append((u, weight))   # Undirected
+
+    def __str__(self):
+        lines = []
+        for vertex, neighbors in self.adjacency_list.items():
+            lines.append(f"{vertex} → {neighbors}")
+        return "\n".join(lines)
+```
+
+Test:
 ```python
 g = Graph()
 g.add_edge("A", "B", 4)
@@ -216,30 +209,23 @@ g.add_edge("B", "D", 5)
 g.add_edge("C", "D", 1)
 g.add_edge("D", "E", 3)
 print(g)
-# A → [('B', 4), ('C', 2)]
-# B → [('A', 4), ('D', 5)]
-# C → [('A', 2), ('D', 1)]
-# D → [('B', 5), ('C', 1), ('E', 3)]
-# E → [('D', 3)]
 ```
 
 ---
 
 ### Step 2 — `bfs(start)`
 
-Implement BFS starting from `start`. Return a list of vertices in the order they were visited.
+Return a list of vertices visited in breadth-first order.
 
 ```python
-print(g.bfs("A"))   # ['A', 'B', 'C', 'D', 'E']  (neighbor order may vary)
+print(g.bfs("A"))   # ['A', 'B', 'C', 'D', 'E']  (exact order may vary by neighbor order)
 ```
-
-Use a `collections.deque` as your queue. Add neighbors to the queue only if they haven't been visited.
 
 ---
 
 ### Step 3 — `dfs(start)`
 
-Implement DFS starting from `start`. Use **recursion** (not an explicit stack). Return a list of vertices in visit order.
+Return a list in depth-first order (use recursion).
 
 ```python
 print(g.dfs("A"))   # ['A', 'B', 'D', 'C', 'E']  (order depends on neighbor order)
@@ -249,20 +235,19 @@ print(g.dfs("A"))   # ['A', 'B', 'D', 'C', 'E']  (order depends on neighbor orde
 
 ### Step 4 — `has_path(start, end)`
 
-Return `True` if there is any path from `start` to `end`, `False` otherwise. Use BFS or DFS internally.
+Return `True` if any path exists from `start` to `end`. Return `False` if the vertex doesn't exist or there's no connection.
 
 ```python
-print(g.has_path("A", "E"))   # True
-print(g.has_path("A", "Z"))   # False  (Z doesn't exist)
+print(g.has_path("A", "E"))    # True
+print(g.has_path("A", "Z"))    # False  (Z doesn't exist)
 ```
 
 ---
 
 ### Step 5 — `connected_components()`
 
-Return a list of sets, where each set is one connected component (group of nodes that can all reach each other).
+Build a disconnected graph and find all components:
 
-Build a disconnected graph to test this:
 ```python
 g2 = Graph()
 g2.add_edge("A", "B")
@@ -270,69 +255,69 @@ g2.add_edge("B", "C")
 g2.add_edge("D", "E")
 g2.add_vertex("F")
 print(g2.connected_components())
-# [{'A', 'B', 'C'}, {'D', 'E'}, {'F'}]  (set order may vary)
+# [{'A', 'B', 'C'}, {'D', 'E'}, {'F'}]  — three separate groups
 ```
 
 ---
 
 ### Step 6 — `dijkstra(start)`
 
-Implement Dijkstra's algorithm. Return a dictionary mapping every reachable vertex to its shortest distance from `start`.
+Return a dictionary of shortest distances from `start` to every reachable node.
 
 ```python
 distances = g.dijkstra("A")
 print(distances)
-# {'A': 0, 'C': 2, 'B': 4, 'D': 3, 'E': 6}
+# {'A': 0, 'B': 4, 'C': 2, 'D': 3, 'E': 6}
 ```
 
-Verify by tracing the shortest paths by hand:
-- A→C = 2
-- A→C→D = 3
-- A→B = 4
-- A→C→D→E = 6
+Verify by hand: A→C = 2, A→C→D = 3, A→B = 4, A→C→D→E = 6. ✅
 
 ---
 
 ### Step 7 — `shortest_path(start, end)`
 
-Extend Dijkstra to also track the **actual path** (not just the distance). Return a tuple `(distance, path)` where `path` is a list of vertices.
+Extend Dijkstra to also track which node came before each node (a `previous` dictionary). After finding shortest distances, backtrack from `end` through `previous` to reconstruct the path.
 
 ```python
 dist, path = g.shortest_path("A", "E")
-print(dist)   # 6
-print(path)   # ['A', 'C', 'D', 'E']
+print(dist)    # 6
+print(path)    # ['A', 'C', 'D', 'E']
 ```
 
-**Hint:** Track a `previous` dictionary in your Dijkstra implementation. After finding shortest distances, walk backward from `end` through `previous` to reconstruct the path, then reverse it.
+**Hint:** After Dijkstra, build the path by starting at `end` and following `previous[node]` backward until you reach `start`. Then reverse the result.
 
 ---
 
 ### Step 8 — Campus map demo
 
-At the bottom of your file, build a mini campus map and demonstrate all features:
-
 ```python
-campus = Graph()
-campus.add_edge("Library", "Science Hall", 5)
-campus.add_edge("Library", "Student Union", 3)
-campus.add_edge("Science Hall", "Engineering", 2)
-campus.add_edge("Student Union", "Engineering", 7)
-campus.add_edge("Engineering", "Dorms", 4)
+def campus_demo():
+    campus = Graph()
+    campus.add_edge("Library", "Science Hall", 5)
+    campus.add_edge("Library", "Student Union", 3)
+    campus.add_edge("Science Hall", "Engineering", 2)
+    campus.add_edge("Student Union", "Engineering", 7)
+    campus.add_edge("Engineering", "Dorms", 4)
 
-print("All buildings (BFS from Library):", campus.bfs("Library"))
-dist, path = campus.shortest_path("Library", "Dorms")
-print(f"Shortest path to Dorms: {' → '.join(path)} ({dist} min)")
+    print("Campus map:")
+    print(campus)
+    print("\nBFS from Library:", campus.bfs("Library"))
+
+    dist, path = campus.shortest_path("Library", "Dorms")
+    print(f"\nShortest path to Dorms: {' → '.join(path)} (total: {dist} min)")
+
+campus_demo()
 ```
 
 ---
 
 ### Checklist Before Submitting
 
-- [ ] `add_vertex()` and `add_edge()` work correctly; `__str__()` shows the adjacency list.
-- [ ] `bfs()` visits all reachable nodes in breadth-first order.
-- [ ] `dfs()` visits all reachable nodes in depth-first order using recursion.
-- [ ] `has_path()` returns `True`/`False` correctly, including for non-existent vertices.
-- [ ] `connected_components()` identifies all components including isolated vertices.
-- [ ] `dijkstra()` returns correct shortest distances (verified by hand for the example graph).
-- [ ] `shortest_path()` returns both the distance and the actual path as a list.
-- [ ] The campus map demo runs and prints meaningful output.
+- [ ] `add_vertex()` and `add_edge()` work; `__str__()` shows adjacency list
+- [ ] `bfs()` visits all reachable nodes in breadth-first order (uses a queue)
+- [ ] `dfs()` visits all reachable nodes in depth-first order (uses recursion)
+- [ ] `has_path()` returns correct result, including `False` for non-existent vertices
+- [ ] `connected_components()` correctly finds all groups including isolated vertices
+- [ ] `dijkstra()` returns correct shortest distances (verified by hand)
+- [ ] `shortest_path()` returns both the distance and the actual path as a list
+- [ ] Campus demo runs and prints meaningful output

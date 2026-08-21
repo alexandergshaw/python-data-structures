@@ -1,32 +1,55 @@
 # Week 9 — Searching and Sorting
-
-Searching and sorting are among the most studied problems in computer science. This week you implement the classic algorithms, understand *why* they have their complexities, and measure how they perform in practice.
+### Linear Search, Binary Search, Bubble/Selection/Merge/Quick Sort
 
 ---
 
-## Concepts Covered
+## Welcome!
 
-### 1. Linear Search
+Searching and sorting are things computers do billions of times a day. Every time you search for something on Google or scroll through a sorted playlist, an algorithm like the ones in this module is running. This week you build them yourself so you understand why some approaches are fast and others crawl.
 
-Scan every element from left to right until you find the target or exhaust the list.
+---
+
+## Concept 1: Linear Search — The Obvious Way
+
+Walk through the list from the beginning and check each item until you find what you're looking for — or reach the end.
+
+**Analogy:** You lost your keys. You check the kitchen counter, then the coffee table, then your coat pocket, one spot at a time, until you find them or give up. That's linear search.
 
 ```python
 def linear_search(arr, target):
     for i, value in enumerate(arr):
         if value == target:
-            return i    # Return index of found item
-    return -1           # Not found
+            return i      # Found it — return the index
+    return -1             # Not found
 ```
 
-- Works on **unsorted** lists.
-- Time complexity: **O(n)** worst case (target at end or absent).
-- Best case: **O(1)** (target is first).
+- Works on **any** list — sorted or not
+- Time: O(n) worst case (check every item)
+- Best case: O(1) (it's the first item)
 
 ---
 
-### 2. Binary Search
+## Concept 2: Binary Search — The Smart Way (for Sorted Lists Only!)
 
-Divide the sorted list in half repeatedly until you find the target or the search space is empty.
+Binary search uses the fact that the list is **sorted** to eliminate half the remaining items with every single check.
+
+**Analogy:** Guessing a number between 1 and 100. Someone tells you "higher" or "lower" after each guess. A smart player always guesses the middle (50 first, then 25 or 75, etc.). With this strategy you can find any number in at most 7 guesses. That's binary search.
+
+```
+List: [1, 3, 5, 7, 9, 11, 13]
+Find: 7
+
+Step 1: Middle is 7 (index 3). Found it!
+
+Find: 11
+Step 1: Middle is 7 (index 3). 11 > 7, so search right half [9, 11, 13]
+Step 2: Middle is 11 (index 5). Found it!
+
+Find: 4
+Step 1: Middle is 7. 4 < 7, search left half [1, 3, 5]
+Step 2: Middle is 3. 4 > 3, search right half [5]
+Step 3: Only one item: 5 ≠ 4. Not found. Return -1.
+```
 
 ```python
 def binary_search(arr, target):
@@ -36,71 +59,76 @@ def binary_search(arr, target):
         if arr[mid] == target:
             return mid
         elif arr[mid] < target:
-            low = mid + 1    # Target is in the right half
+            low = mid + 1      # Target is in the right half
         else:
-            high = mid - 1   # Target is in the left half
+            high = mid - 1     # Target is in the left half
     return -1
 ```
 
-- **Requires a sorted list.**
-- Time complexity: **O(log n)** — each step eliminates half the remaining elements.
-
-> **Key insight:** With 1,000,000 elements, binary search takes at most 20 comparisons. Linear search could take 1,000,000.
+- **Requires a sorted list — wrong results on unsorted data!**
+- Time: O(log n) — 1 million items → at most 20 checks
 
 ---
 
-### 3. Bubble Sort
+## Concept 3: Bubble Sort — The Simple (Slow) One
 
-Repeatedly compare adjacent elements and swap them if they're in the wrong order. The largest unsorted element "bubbles" to its correct position each pass.
+Go through the list over and over, comparing neighboring pairs. Swap them if they're in the wrong order. The biggest item "bubbles" to the end each pass.
+
+**Analogy:** Imagine you're sorting a line of people by height, but you can only see two neighbors at a time. You walk the line comparing pairs. The tallest person slowly moves to the end through a series of swaps. Then you go again, and the second tallest reaches its spot. You repeat until no more swaps happen.
 
 ```python
 def bubble_sort(arr):
+    arr = arr[:]          # Make a copy so we don't modify the original
     n = len(arr)
     for i in range(n):
         for j in range(0, n - i - 1):
             if arr[j] > arr[j + 1]:
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]   # Swap
     return arr
 ```
 
-- Time complexity: **O(n²)** average and worst case.
-- Simple to understand, but inefficient for large lists.
+- Time: O(n²) — very slow on large lists
+- Simple to understand — good for learning, not for real use
 
 ---
 
-### 4. Selection Sort
+## Concept 4: Selection Sort — Pick the Smallest Each Time
 
-Find the minimum element in the unsorted portion and move it to its correct position.
+Find the smallest item in the unsorted portion, and move it to the front. Repeat.
+
+**Analogy:** Sorting a hand of playing cards. You look at all your cards, pick out the lowest, put it first. Then look at the rest, pick the lowest of those, put it second. Repeat until done.
 
 ```python
 def selection_sort(arr):
+    arr = arr[:]
     n = len(arr)
     for i in range(n):
         min_idx = i
         for j in range(i + 1, n):
             if arr[j] < arr[min_idx]:
                 min_idx = j
-        arr[i], arr[min_idx] = arr[min_idx], arr[i]   # Swap
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]   # Swap smallest to front
     return arr
 ```
 
-- Time complexity: **O(n²)** — always performs n²/2 comparisons.
-- Makes fewer swaps than bubble sort, which can matter when swaps are expensive.
+- Time: O(n²) — also slow, but makes fewer swaps than bubble sort
 
 ---
 
-### 5. Merge Sort — Divide and Conquer
+## Concept 5: Merge Sort — Divide and Conquer
 
-Split the list in half, sort each half recursively, then merge the two sorted halves.
+Split the list in half. Sort each half. Merge the two sorted halves back together.
+
+**Analogy:** You and a friend each get half a shuffled deck of cards. You each sort your half (by using this same trick recursively). Then you merge your two sorted piles into one: look at the top card of each pile, take the smaller one, repeat until done.
 
 ```python
 def merge_sort(arr):
-    if len(arr) <= 1:
+    if len(arr) <= 1:              # BASE CASE — a list of 0 or 1 items is already sorted
         return arr
     mid = len(arr) // 2
-    left = merge_sort(arr[:mid])
-    right = merge_sort(arr[mid:])
-    return merge(left, right)
+    left = merge_sort(arr[:mid])   # Sort left half
+    right = merge_sort(arr[mid:])  # Sort right half
+    return merge(left, right)      # Merge sorted halves
 
 def merge(left, right):
     result = []
@@ -112,58 +140,48 @@ def merge(left, right):
         else:
             result.append(right[j])
             j += 1
-    result.extend(left[i:])
+    result.extend(left[i:])     # Add any remaining items
     result.extend(right[j:])
     return result
 ```
 
-- Time complexity: **O(n log n)** — the most efficient you can achieve for comparison-based sorting.
-- Space complexity: **O(n)** — requires extra memory for merging.
+- Time: O(n log n) — much faster than O(n²) on large inputs
+- Space: O(n) — needs extra memory for merging
 
 ---
 
-### 6. Quick Sort — Divide and Conquer
+## Concept 6: Quick Sort — Another Divide and Conquer
 
-Choose a **pivot**, partition elements into "less than pivot" and "greater than pivot," then sort each partition recursively.
+Choose a **pivot** value. Put everything smaller than the pivot on the left. Put everything larger on the right. Sort the left and right sides recursively.
+
+**Analogy:** You're sorting a pile of mail. You pick one letter (the pivot). Anything that comes before it alphabetically goes in a left pile. Anything that comes after goes in a right pile. Now sort each pile the same way.
 
 ```python
 def quick_sort(arr):
     if len(arr) <= 1:
         return arr
-    pivot = arr[len(arr) // 2]
-    left = [x for x in arr if x < pivot]
+    pivot = arr[len(arr) // 2]            # Pick the middle element as pivot
+    left   = [x for x in arr if x < pivot]
     middle = [x for x in arr if x == pivot]
-    right = [x for x in arr if x > pivot]
+    right  = [x for x in arr if x > pivot]
     return quick_sort(left) + middle + quick_sort(right)
 ```
 
-- Average time complexity: **O(n log n)**.
-- Worst case: **O(n²)** (rare with good pivot choice).
-- Often faster than merge sort in practice due to lower overhead.
+- Average time: O(n log n)
+- Worst case: O(n²) — rare in practice with good pivot selection
 
 ---
 
-### 7. Performance Comparison
+## Comparison Table
 
-| Algorithm      | Best      | Average   | Worst     | Space  |
-|----------------|-----------|-----------|-----------|--------|
-| Linear search  | O(1)      | O(n)      | O(n)      | O(1)   |
-| Binary search  | O(1)      | O(log n)  | O(log n)  | O(1)   |
-| Bubble sort    | O(n)      | O(n²)     | O(n²)     | O(1)   |
-| Selection sort | O(n²)     | O(n²)     | O(n²)     | O(1)   |
-| Merge sort     | O(n log n)| O(n log n)| O(n log n)| O(n)   |
-| Quick sort     | O(n log n)| O(n log n)| O(n²)     | O(log n)|
-
----
-
-## Hints for This Week's Assignment
-
-- **Never use binary search on an unsorted list** — the results will be wrong.
-- To measure real performance, use Python's `time` module: `import time; start = time.time(); ...; print(time.time() - start)`.
-- For merge sort, implement and test `merge()` first by itself before adding the recursive part.
-- For quick sort, the simple version (shown above) creates new lists at each step. This is slightly less memory-efficient but much easier to understand — start here.
-- When comparing algorithms, test with sorted, reverse-sorted, and random inputs — performance can vary dramatically.
-- Python's built-in `sorted()` and `.sort()` use **Timsort**, which is O(n log n) and extremely optimized. In real code, always prefer the built-in — implement sorting algorithms to understand them, not to use them in production.
+| Algorithm | Speed (worst case) | Speed (best case) | Works on unsorted? |
+|-----------|--------------------|--------------------|----------------------|
+| Linear search | O(n) | O(1) | ✅ Yes |
+| Binary search | O(log n) | O(1) | ❌ Sorted only |
+| Bubble sort | O(n²) | O(n) | ✅ |
+| Selection sort | O(n²) | O(n²) | ✅ |
+| Merge sort | O(n log n) | O(n log n) | ✅ |
+| Quick sort | O(n²) | O(n log n) | ✅ |
 
 ---
 
@@ -171,13 +189,13 @@ def quick_sort(arr):
 
 **File to create:** `module_09/searching_sorting.py`
 
-You will implement two search algorithms and four sort algorithms, then benchmark them against each other. Follow each step in order.
+You'll implement both search algorithms and all four sort algorithms, verify they agree, and benchmark them.
 
 ---
 
 ### Step 1 — `linear_search(arr, target)`
 
-Return the **index** of `target` in `arr`, or `-1` if not found. Scan from left to right.
+Return the index of the first occurrence of `target`, or `-1` if not found.
 
 ```python
 print(linear_search([5, 3, 8, 1, 9], 8))   # 2
@@ -188,21 +206,20 @@ print(linear_search([5, 3, 8, 1, 9], 7))   # -1
 
 ### Step 2 — `binary_search(arr, target)`
 
-Return the **index** of `target` in the **sorted** list `arr`, or `-1` if not found.
+Return the index of `target` in the **sorted** list, or `-1`.
 
 ```python
-sorted_arr = [1, 3, 5, 7, 9, 11, 13]
-print(binary_search(sorted_arr, 7))    # 3
-print(binary_search(sorted_arr, 6))    # -1
-print(binary_search(sorted_arr, 1))    # 0
-print(binary_search(sorted_arr, 13))   # 6
+sorted_nums = [1, 3, 5, 7, 9, 11, 13]
+print(binary_search(sorted_nums, 7))    # 3
+print(binary_search(sorted_nums, 6))    # -1
+print(binary_search(sorted_nums, 1))    # 0
 ```
 
 ---
 
 ### Step 3 — `bubble_sort(arr)`
 
-Return a **sorted copy** of `arr` using bubble sort. Do not modify the original list.
+Return a sorted copy. Don't modify the original list.
 
 ```python
 print(bubble_sort([64, 34, 25, 12, 22, 11, 90]))
@@ -213,7 +230,7 @@ print(bubble_sort([64, 34, 25, 12, 22, 11, 90]))
 
 ### Step 4 — `selection_sort(arr)`
 
-Return a **sorted copy** of `arr` using selection sort.
+Return a sorted copy. Don't modify the original list.
 
 ```python
 print(selection_sort([29, 10, 14, 37, 13]))
@@ -222,25 +239,22 @@ print(selection_sort([29, 10, 14, 37, 13]))
 
 ---
 
-### Step 5 — `merge_sort(arr)`
+### Step 5 — `merge(left, right)` then `merge_sort(arr)`
 
-Return a **sorted copy** of `arr` using merge sort. You need two functions: `merge_sort()` (recursive) and a helper `merge(left, right)`.
+Implement `merge()` first and test it:
+```python
+print(merge([1, 3, 5], [2, 4, 6]))   # [1, 2, 3, 4, 5, 6]
+```
 
+Then implement `merge_sort()`:
 ```python
 print(merge_sort([38, 27, 43, 3, 9, 82, 10]))
 # [3, 9, 10, 27, 38, 43, 82]
 ```
 
-Test `merge()` separately first:
-```python
-print(merge([1, 3, 5], [2, 4, 6]))   # [1, 2, 3, 4, 5, 6]
-```
-
 ---
 
 ### Step 6 — `quick_sort(arr)`
-
-Return a **sorted copy** of `arr` using quick sort. Use the middle element as the pivot.
 
 ```python
 print(quick_sort([10, 80, 30, 90, 40, 50, 70]))
@@ -249,20 +263,18 @@ print(quick_sort([10, 80, 30, 90, 40, 50, 70]))
 
 ---
 
-### Step 7 — Verify all sorts produce the same result
-
-Add a block at the bottom of your file that verifies all four sort functions produce identical output:
+### Step 7 — Verify all four sorts agree
 
 ```python
 import random
-test_list = random.sample(range(1000), 20)   # 20 random numbers
+test_list = random.sample(range(1000), 20)
 
 b = bubble_sort(test_list)
 s = selection_sort(test_list)
 m = merge_sort(test_list)
 q = quick_sort(test_list)
 
-assert b == s == m == q == sorted(test_list), "Sorting mismatch!"
+assert b == s == m == q == sorted(test_list), "Mismatch detected!"
 print("All four sorts agree:", b)
 ```
 
@@ -270,43 +282,38 @@ print("All four sorts agree:", b)
 
 ### Step 8 — Benchmark bubble sort vs. merge sort
 
-Time both algorithms on a list of 2000 random integers and print the results:
-
 ```python
 import time, random
-
 big = random.sample(range(100_000), 2000)
 
 start = time.time()
 bubble_sort(big)
-print(f"Bubble sort:  {time.time() - start:.4f}s")
+print(f"Bubble sort: {time.time() - start:.4f}s")
 
 start = time.time()
 merge_sort(big)
-print(f"Merge sort:   {time.time() - start:.4f}s")
-```
+print(f"Merge sort:  {time.time() - start:.4f}s")
 
-In a comment, write one sentence explaining the speed difference you observe.
+# Add a comment: which was faster, and roughly by how many times?
+```
 
 ---
 
 ### Step 9 — Search demo
 
 Using the list `[2, 5, 8, 12, 16, 23, 38, 56, 72, 91]`:
-
-1. Use `linear_search` to find `23` and `99`. Print the results.
-2. Use `binary_search` to find `23` and `99`. Print the results.
-3. In a comment, state which search is faster for this list and why.
+- Use `linear_search` to find `23` and `99`. Print the results.
+- Use `binary_search` to find `23` and `99`. Print the results.
+- In a comment, state which is faster and why.
 
 ---
 
 ### Checklist Before Submitting
 
-- [ ] `linear_search` returns the correct index or `-1`.
-- [ ] `binary_search` returns the correct index or `-1`; works only on sorted input.
-- [ ] `bubble_sort`, `selection_sort`, `merge_sort`, `quick_sort` all return sorted copies without modifying the input.
-- [ ] The `merge()` helper is implemented and tested separately.
-- [ ] The assertion block passes (all four sorts agree with `sorted()`).
-- [ ] The benchmark prints times for both bubble sort and merge sort.
-- [ ] A comment explains the observed speed difference.
-- [ ] The search demo prints results for both algorithms.
+- [ ] `linear_search` returns correct index or `-1`
+- [ ] `binary_search` returns correct index or `-1`; only use it on sorted lists
+- [ ] All four sort functions return sorted copies and leave the original unchanged
+- [ ] `merge()` helper works correctly on its own
+- [ ] The assertion block passes (all four sorts agree with `sorted()`)
+- [ ] Benchmark prints times for both algorithms with a comment on the difference
+- [ ] Search demo is present and prints results for both algorithms

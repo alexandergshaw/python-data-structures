@@ -1,132 +1,152 @@
 # Week 8 — Recursion
-
-Recursion is a technique where a function **calls itself** to solve a smaller version of the same problem. It feels magical at first, but it follows simple rules. Master those rules and recursion becomes one of the most elegant tools in your toolkit.
-
----
-
-## Concepts Covered
-
-### 1. The Two Essential Parts of Every Recursive Function
-
-Every recursive function must have:
-
-1. **Base case** — a condition that stops the recursion and returns a result directly (no more self-calls).
-2. **Recursive case** — the function calls itself with a *smaller* or *simpler* input, moving toward the base case.
-
-If you forget the base case, the function calls itself forever until Python raises a `RecursionError` (stack overflow).
+### Base Cases, Recursive Cases, the Call Stack, and Classic Problems
 
 ---
 
-### 2. The Call Stack
+## Welcome!
 
-When a function calls itself, Python does not overwrite the current function — it creates a **new call frame** on the call stack. Each call gets its own copy of all local variables.
-
-```
-factorial(4)
-  → factorial(3)
-      → factorial(2)
-          → factorial(1)   # base case: returns 1
-        ← 2 * 1 = 2
-      ← 3 * 2 = 6
-    ← 4 * 6 = 24
-```
-
-Results bubble back up through the stack once the base case is reached.
+Recursion is one of those ideas that feels impossible at first and then clicks all at once. Be patient with yourself this week. Read slowly, try the examples yourself, and trust the process.
 
 ---
 
-### 3. Factorial
+## Concept 1: What Is Recursion?
 
-`n! = n × (n-1) × (n-2) × ... × 1`, and `0! = 1`.
+**Recursion** is when a function calls *itself* as part of solving a problem.
+
+**Analogy:** Have you ever stood between two mirrors facing each other? Each mirror reflects a reflection of a reflection of a reflection — and so on. That's recursion visually.
+
+A more practical analogy: Russian nesting dolls (Matryoshka). You open the big doll, find a smaller one. Open that, find an even smaller one. You keep going until you reach the tiniest doll that doesn't open. That tiny doll is the **base case** — the thing that stops the recursion.
+
+---
+
+## Concept 2: The Two Rules — Every Recursive Function Has Both
+
+### Rule 1: Base Case — Know When to Stop
+
+The **base case** is the situation where the function does NOT call itself. It just returns an answer directly. Without a base case, the function would call itself forever (causing a `RecursionError`).
+
+### Rule 2: Recursive Case — Make the Problem Smaller
+
+The **recursive case** is where the function calls itself with a *smaller or simpler* version of the problem. Each call must get closer to the base case.
+
+---
+
+## Concept 3: Factorial — The Hello World of Recursion
+
+Factorial: `5! = 5 × 4 × 3 × 2 × 1 = 120`
+
+Notice: `5! = 5 × 4!` — the answer to the big problem contains the answer to a smaller version of the same problem. That's the heart of recursion.
 
 ```python
 def factorial(n):
-    if n == 0:          # Base case
+    if n == 0:               # BASE CASE — stop here
         return 1
-    return n * factorial(n - 1)   # Recursive case
-
-print(factorial(5))  # 120
+    return n * factorial(n - 1)   # RECURSIVE CASE — smaller problem
 ```
 
-Notice: the problem gets smaller each call (`n - 1`), and eventually reaches the base case (`n == 0`).
+Tracing `factorial(4)`:
+```
+factorial(4)
+  = 4 * factorial(3)
+  = 4 * 3 * factorial(2)
+  = 4 * 3 * 2 * factorial(1)
+  = 4 * 3 * 2 * 1 * factorial(0)
+  = 4 * 3 * 2 * 1 * 1        ← base case returns 1
+  = 4 * 3 * 2 * 1
+  = 4 * 3 * 2
+  = 4 * 6
+  = 24
+```
+
+The answers "bubble back up" once the base case is reached.
 
 ---
 
-### 4. Fibonacci
+## Concept 4: The Call Stack
 
-The Fibonacci sequence: 0, 1, 1, 2, 3, 5, 8, 13, ...  
-Each number is the sum of the two before it.
+When a function calls itself, Python doesn't forget where it was. It keeps a **stack** (literally — from last week!) of all the places it needs to come back to.
+
+**Analogy:** You're reading a book and see a footnote. You jump to the footnote (the recursive call), and you put a bookmark on the original page. The footnote has another footnote — you bookmark that page too, and jump again. Eventually you reach a footnote with no more references. You read it and then follow your bookmarks back to where you started.
+
+Python has a limit on how deep this can go (about 1000 levels). If your recursion goes deeper than that — usually because the base case is missing — you get:
+```
+RecursionError: maximum recursion depth exceeded
+```
+
+---
+
+## Concept 5: Fibonacci
+
+The Fibonacci sequence: 0, 1, 1, 2, 3, 5, 8, 13, 21, ...
+
+Each number is the sum of the two before it: `fib(n) = fib(n-1) + fib(n-2)`
 
 ```python
 def fibonacci(n):
-    if n <= 1:                           # Base cases
+    if n <= 1:                           # BASE CASE — two bases!
         return n
-    return fibonacci(n - 1) + fibonacci(n - 2)   # Recursive case
-
-print(fibonacci(7))  # 13
+    return fibonacci(n - 1) + fibonacci(n - 2)   # RECURSIVE CASE
 ```
 
-> **Warning:** This naive version is very slow for large `n` because it recalculates the same values repeatedly. (You'll fix this in Week 15 with memoization.)
+`fibonacci(0)` = 0, `fibonacci(1)` = 1, `fibonacci(2)` = 1, `fibonacci(7)` = 13
+
+⚠️ This version is very slow for large `n` because it recalculates the same subproblems over and over. You'll fix this in Week 15 with a technique called memoization.
 
 ---
 
-### 5. Recursive List Sum
+## Concept 6: Recursive List Sum
+
+**Problem:** Add up all numbers in a list using recursion (no loops allowed).
+
+**Insight:** The sum of `[1, 2, 3, 4]` is `1 + sum of [2, 3, 4]`. The problem gets one item smaller each time.
 
 ```python
-def list_sum(numbers):
-    if len(numbers) == 0:   # Base case: empty list sums to 0
+def recursive_sum(numbers):
+    if len(numbers) == 0:   # BASE CASE — empty list sums to 0
         return 0
-    return numbers[0] + list_sum(numbers[1:])   # First item + sum of rest
+    return numbers[0] + recursive_sum(numbers[1:])
+    # numbers[1:] is "all items except the first" — one item smaller
 ```
-
-`numbers[1:]` is a slice — it returns all items except the first, making the list one item shorter each call.
 
 ---
 
-### 6. String Reversal
+## Concept 7: String Reversal
+
+**Problem:** Reverse a string using recursion.
+
+**Insight:** The reverse of `"hello"` is the reverse of `"ello"` plus `"h"` at the end.
 
 ```python
-def reverse(s):
-    if len(s) <= 1:         # Base case: empty or single-char string
+def reverse_string(s):
+    if len(s) <= 1:           # BASE CASE — empty or single character
         return s
-    return reverse(s[1:]) + s[0]   # Reverse rest + add first char at end
-
-print(reverse("hello"))  # "olleh"
+    return reverse_string(s[1:]) + s[0]
 ```
 
 ---
 
-### 7. Exponentiation
+## Concept 8: Exponentiation
+
+**Problem:** Calculate `base` raised to the power `exp`.
+
+**Insight:** `2^10 = 2 × 2^9`. The exponent shrinks by 1 each time.
 
 ```python
 def power(base, exp):
-    if exp == 0:            # Base case: anything to the power 0 is 1
+    if exp == 0:              # BASE CASE — anything^0 = 1
         return 1
     return base * power(base, exp - 1)
-
-print(power(2, 10))  # 1024
 ```
 
 ---
 
-## How to Approach Any Recursive Problem
+## How to Approach Any Recursive Problem (Three Steps)
 
-Follow this three-step process:
+1. **Identify the base case.** What is the *simplest possible input* that has an obvious answer?
+2. **Identify the recursive case.** How does the answer to the big problem depend on the answer to a *smaller* version?
+3. **Trust the recursion.** Assume the recursive call works perfectly for the smaller input. Your only job is to combine it with the current step.
 
-1. **Identify the base case.** What is the simplest possible input? What does it return directly?
-2. **Identify the recursive case.** How can you express the answer in terms of a *smaller* version of the same problem?
-3. **Trust the recursion.** Assume the recursive call works correctly for the smaller input — your job is just to combine its result with the current step.
-
----
-
-## Hints for This Week's Assignment
-
-- **Always define the base case first.** Write the `if` for the base case before writing the recursive call. This forces you to think about when to stop.
-- If you get a `RecursionError: maximum recursion depth exceeded`, your base case is missing or never being reached.
-- **Print the argument** at the top of the function to trace what's happening: `print(f"Called with n={n}")`. Remove it when you're done.
-- Recursive functions look like they do nothing useful — until the base case is hit and results start flowing back. Trust the process!
-- Don't use a loop *inside* a recursive function — if you need a loop, it's a sign you haven't broken the problem down recursively yet.
-- For list problems, `list[1:]` (all but the first) or `list[:-1]` (all but the last) are your best friends for reducing the problem size.
+This third step is where most students get stuck. You don't need to trace every level — just trust that it works for the smaller case, the same way it worked for the previous cases.
 
 ---
 
@@ -134,107 +154,108 @@ Follow this three-step process:
 
 **File to create:** `module_08/recursion.py`
 
-You will implement six recursive functions and one recursive problem of your choosing. **You may not use any loops (`for`, `while`) inside any of these functions** — recursion only.
+**Rule: No loops (`for`, `while`) inside any of these functions.** Recursion only.
 
 ---
 
 ### Step 1 — `factorial(n)`
 
-Return `n!` (n factorial). Recall: `0! = 1`, `1! = 1`, `5! = 120`.
+Return `n!`. Base case: `factorial(0) = 1`.
 
 ```python
-print(factorial(0))   # 1
-print(factorial(5))   # 120
-print(factorial(10))  # 3628800
+print(factorial(0))    # 1
+print(factorial(1))    # 1
+print(factorial(5))    # 120
+print(factorial(10))   # 3628800
 ```
 
 ---
 
 ### Step 2 — `fibonacci(n)`
 
-Return the nth Fibonacci number (0-indexed). Recall: 0, 1, 1, 2, 3, 5, 8, 13, 21 …
+Return the nth Fibonacci number (0-indexed). Two base cases: `fib(0) = 0`, `fib(1) = 1`.
 
 ```python
-print(fibonacci(0))   # 0
-print(fibonacci(1))   # 1
-print(fibonacci(7))   # 13
-print(fibonacci(10))  # 55
+print(fibonacci(0))    # 0
+print(fibonacci(1))    # 1
+print(fibonacci(7))    # 13
+print(fibonacci(10))   # 55
 ```
 
 ---
 
 ### Step 3 — `recursive_sum(numbers)`
 
-Return the sum of all numbers in a list using recursion.
+Return the sum of all numbers in a list. Base case: empty list → return 0.
 
 ```python
-print(recursive_sum([]))           # 0
-print(recursive_sum([5]))          # 5
-print(recursive_sum([1, 2, 3, 4])) # 10
+print(recursive_sum([]))             # 0
+print(recursive_sum([5]))            # 5
+print(recursive_sum([1, 2, 3, 4]))   # 10
+print(recursive_sum([10, -3, 7]))    # 14
 ```
-
-**Hint:** The sum of a list is the first element plus the sum of the rest.
 
 ---
 
 ### Step 4 — `reverse_string(s)`
 
-Return the string `s` reversed, using recursion.
+Return the string reversed. Base case: empty string or single character → return as-is.
 
 ```python
-print(reverse_string(""))        # ""
-print(reverse_string("a"))       # "a"
-print(reverse_string("hello"))   # "olleh"
-print(reverse_string("Python"))  # "nohtyP"
+print(reverse_string(""))         # ""
+print(reverse_string("a"))        # "a"
+print(reverse_string("hello"))    # "olleh"
+print(reverse_string("Python"))   # "nohtyP"
 ```
-
-**Hint:** The reverse of a string is the last character followed by the reverse of everything before it. Or: reverse of `s` = reverse of `s[1:]` + `s[0]`.
 
 ---
 
 ### Step 5 — `power(base, exp)`
 
-Return `base` raised to the power `exp`. Assume `exp >= 0`.
+Return `base` to the power of `exp`. Base case: `exp == 0` → return 1. Assume `exp >= 0`.
 
 ```python
-print(power(2, 0))    # 1
-print(power(2, 10))   # 1024
-print(power(3, 4))    # 81
+print(power(2, 0))     # 1
+print(power(2, 10))    # 1024
+print(power(3, 4))     # 81
+print(power(5, 3))     # 125
 ```
 
 ---
 
 ### Step 6 — `count_occurrences(lst, target)`
 
-Return how many times `target` appears in `lst`, using recursion.
+Return how many times `target` appears in `lst`. Use recursion.
 
 ```python
-print(count_occurrences([], 5))                    # 0
-print(count_occurrences([1, 2, 3, 2, 2], 2))       # 3
-print(count_occurrences(["a", "b", "a"], "a"))     # 2
+print(count_occurrences([], 5))                  # 0
+print(count_occurrences([1, 2, 3, 2, 2], 2))     # 3
+print(count_occurrences(["a", "b", "a"], "a"))   # 2
+print(count_occurrences([1, 2, 3], 9))           # 0
 ```
 
-**Hint:** Check the first element; if it matches, return `1 + recurse on the rest`; otherwise return `0 + recurse on the rest`.
+Hint: check the first item. If it matches, `return 1 + count_occurrences(lst[1:], target)`. If not, `return 0 + count_occurrences(lst[1:], target)`.
 
 ---
 
 ### Step 7 — `flatten(nested)`
 
-Given a list that may contain integers or other lists (nested arbitrarily deep), return a single flat list of all integers.
+Given a list that may contain both integers and other lists (nested to any depth), return a single flat list of all integers.
 
 ```python
-print(flatten([1, [2, 3], [4, [5, 6]]]))   # [1, 2, 3, 4, 5, 6]
-print(flatten([]))                          # []
-print(flatten([1, [2, [3, [4]]]]))          # [1, 2, 3, 4]
+print(flatten([1, [2, 3], [4, [5, 6]]]))    # [1, 2, 3, 4, 5, 6]
+print(flatten([]))                           # []
+print(flatten([1, [2, [3, [4]]]]))           # [1, 2, 3, 4]
+print(flatten([5]))                          # [5]
 ```
 
-**Hint:** For each element in the list — if it's a list, recursively flatten it; if it's not, wrap it in `[element]`. Concatenate all results.
+Hint: For each element — if it's a list, recursively flatten it. If it's not, put it in `[element]`. Concatenate all results.
 
 ---
 
-### Step 8 — Call trace comment
+### Step 8 — Add a call trace comment
 
-Pick **one** of your functions and add a detailed comment block above it showing the full call trace for a small example. For example, for `factorial(4)`:
+Pick any one of your functions and add a comment showing the full call trace for a small input. This forces you to actually understand the recursion. Example for `factorial(4)`:
 
 ```python
 # factorial(4)
@@ -242,7 +263,7 @@ Pick **one** of your functions and add a detailed comment block above it showing
 #       → 3 * factorial(2)
 #           → 2 * factorial(1)
 #               → 1 * factorial(0)
-#                   → 1          (base case)
+#                   → returns 1   (base case)
 #               ← 1 * 1 = 1
 #           ← 2 * 1 = 2
 #       ← 3 * 2 = 6
@@ -253,12 +274,13 @@ Pick **one** of your functions and add a detailed comment block above it showing
 
 ### Checklist Before Submitting
 
-- [ ] All six functions are implemented with **no loops** inside them.
-- [ ] `factorial(0)` returns `1`.
-- [ ] `fibonacci(0)` returns `0` and `fibonacci(1)` returns `1`.
-- [ ] `recursive_sum([])` returns `0` (empty list base case).
-- [ ] `reverse_string("")` returns `""`.
-- [ ] `power(n, 0)` returns `1` for any `n`.
-- [ ] `flatten` handles arbitrarily nested lists.
-- [ ] A call trace comment is present above at least one function.
-- [ ] All test calls shown above are included at the bottom of the file and produce the expected output.
+- [ ] No loops inside any function — recursion only
+- [ ] `factorial(0)` returns 1
+- [ ] `fibonacci(0)` returns 0 and `fibonacci(1)` returns 1
+- [ ] `recursive_sum([])` returns 0 without crashing
+- [ ] `reverse_string("")` returns `""`
+- [ ] `power(n, 0)` returns 1 for any n
+- [ ] `count_occurrences([], anything)` returns 0
+- [ ] `flatten` handles arbitrarily deep nesting
+- [ ] A call trace comment exists above at least one function
+- [ ] All test calls shown above are present and produce correct output

@@ -1,24 +1,32 @@
 # Week 11 — Heaps and Priority Queues
-
-A **heap** is a specialized tree structure that always keeps its smallest (or largest) element instantly accessible. It's the engine behind priority queues, efficient sorting, and scheduling systems. This week you build one using a plain Python list.
+### Min-Heaps, Array Representation, Sift-Up, Sift-Down, and Scheduling
 
 ---
 
-## Concepts Covered
+## Welcome!
 
-### 1. What Is a Heap?
+You've learned about queues — first in, first out. But what if the order shouldn't be based on arrival time? What if the most *urgent* item should always go first, regardless of when it arrived? That's what a **priority queue** does, and it's powered by a data structure called a **heap**.
 
-A **min-heap** is a binary tree with two properties:
+---
 
-1. **Shape property:** The tree is a **complete binary tree** — every level is fully filled except possibly the last, which fills left to right.
-2. **Heap property:** Every node's value is **less than or equal to** its children's values.
+## Concept 1: The Priority Queue Problem
 
-Result: the **smallest element is always at the root**.
+Imagine a hospital emergency room. Patients don't get seen in the order they arrived — they get seen based on how critical their condition is. A patient with a heart attack goes before someone with a sprained ankle, even if the ankle patient arrived first.
 
-A **max-heap** reverses the rule — every node is greater than or equal to its children, so the largest is at the root.
+A **priority queue** is the data structure that makes this possible: you insert items with a priority number, and you always get back the item with the highest priority (usually the lowest priority number — 1 = most urgent).
+
+---
+
+## Concept 2: What Is a Heap?
+
+A **min-heap** is a special kind of binary tree where:
+1. **It's always "complete"** — every level is full except possibly the last, and the last level fills from left to right
+2. **The smallest value is always at the top** — every node's value is smaller than or equal to its children
+
+This second property means you can always find the minimum in O(1) — it's right at the top.
 
 ```
-Min-heap example:
+Min-heap:
         1
        / \
       3   5
@@ -26,61 +34,60 @@ Min-heap example:
     7  4 6
 ```
 
+Is `1` ≤ `3` and `5`? Yes. Is `3` ≤ `7` and `4`? Yes. Is `5` ≤ `6`? Yes. ✅ Valid min-heap.
+
+A **max-heap** is the same idea but reversed — the largest value is always at the top.
+
 ---
 
-### 2. Array-Based Heap Representation
+## Concept 3: Storing the Heap in a List (No Pointers Needed!)
 
-Because heaps are always complete binary trees, you can store them efficiently in a plain list (no pointers needed):
+Because a heap is always a complete tree, you can store it in a plain Python list and calculate parent/child relationships with simple math:
 
 ```
 Index:  0  1  2  3  4  5
 Array: [1, 3, 5, 7, 4, 6]
 ```
 
-For a node at index `i`:
-- **Left child:** `2 * i + 1`
-- **Right child:** `2 * i + 2`
-- **Parent:** `(i - 1) // 2`
+For any node at index `i`:
+- **Left child** is at index `2*i + 1`
+- **Right child** is at index `2*i + 2`
+- **Parent** is at index `(i - 1) // 2`
+
+**Check:** The node at index 1 (value = 3) has left child at index 3 (value = 7) and right child at index 4 (value = 4). Parent at index 0 (value = 1). ✅
 
 This is how Python's built-in `heapq` module works internally.
 
 ---
 
-### 3. Sift-Up (After Insertion)
+## Concept 4: Sift-Up — Restoring Order After Insertion
 
-When you add a new element, append it to the end of the list, then "sift up" to restore the heap property:
+When you add a new item, you always append it to the end of the list first. But this might violate the heap property (the new item might be smaller than its parent). So you "sift up" — swap the item with its parent repeatedly until the heap property is restored.
+
+**Analogy:** A new employee joins a company at the bottom (intern). But they're more capable than their direct manager. They get promoted (swapped) up one level. Still more capable than the next manager? Promoted again. Eventually they find their right level.
 
 ```python
-def push(self, value):
-    self._data.append(value)
-    self._sift_up(len(self._data) - 1)
-
 def _sift_up(self, index):
     while index > 0:
         parent = (index - 1) // 2
-        if self._data[index] < self._data[parent]:
-            self._data[index], self._data[parent] = \
-                self._data[parent], self._data[index]
-            index = parent
+        if self._data[index] < self._data[parent]:   # Child smaller than parent?
+            self._data[index], self._data[parent] = self._data[parent], self._data[index]
+            index = parent    # Move up and check again
         else:
-            break
+            break             # Heap property restored — stop
 ```
 
 ---
 
-### 4. Sift-Down (After Extraction)
+## Concept 5: Sift-Down — Restoring Order After Removal
 
-When you remove the minimum (the root), replace it with the last element, then "sift down":
+When you remove the minimum (the root), you:
+1. Move the last item to the root position (to fill the gap)
+2. "Sift down" — swap it with its smallest child repeatedly until the heap property is restored
+
+**Analogy:** The best employee (root) leaves the company. You temporarily promote the newest intern to their role. The intern might not be the best fit, so you reassign them: they swap with the more capable of their two direct reports. Then check that level. Repeat until everyone is in a valid place.
 
 ```python
-def pop(self):
-    if len(self._data) == 0:
-        raise IndexError("Heap is empty")
-    # Swap root with last, remove last
-    self._data[0] = self._data[-1]
-    self._data.pop()
-    self._sift_down(0)
-
 def _sift_down(self, index):
     n = len(self._data)
     while True:
@@ -94,70 +101,19 @@ def _sift_down(self, index):
             smallest = right
 
         if smallest != index:
-            self._data[index], self._data[smallest] = \
-                self._data[smallest], self._data[index]
-            index = smallest
+            self._data[index], self._data[smallest] = self._data[smallest], self._data[index]
+            index = smallest    # Move down and check again
         else:
-            break
-```
-
-Both sift-up and sift-down are **O(log n)** because the tree height is log n.
-
----
-
-### 5. Priority Queues
-
-A **priority queue** is an ADT where each item has a priority and the item with the highest priority (lowest number, usually) is always served first — regardless of insertion order.
-
-Implemented with a min-heap:
-
-```python
-import heapq
-
-class PriorityQueue:
-    def __init__(self):
-        self._heap = []
-
-    def push(self, priority, item):
-        heapq.heappush(self._heap, (priority, item))
-
-    def pop(self):
-        priority, item = heapq.heappop(self._heap)
-        return item
-
-    def is_empty(self):
-        return len(self._heap) == 0
-```
-
-**Real-world uses:** hospital triage, CPU scheduling, Dijkstra's shortest-path algorithm.
-
----
-
-### 6. Task Scheduling Example
-
-```python
-pq = PriorityQueue()
-pq.push(3, "Low priority task")
-pq.push(1, "Urgent task")
-pq.push(2, "Medium task")
-
-while not pq.is_empty():
-    print(pq.pop())
-# Urgent task
-# Medium task
-# Low priority task
+            break               # Heap property restored
 ```
 
 ---
 
-## Hints for This Week's Assignment
+## Concept 6: Priority Queues Using Heaps
 
-- **Index arithmetic is your friend.** Write out the parent/child formulas and verify them manually on a small array before coding.
-- Always check for the empty case in `pop()` and `peek()`.
-- Sift-up stops when the node is in the right place (heap property holds) or when it reaches the root.
-- Sift-down stops when both children are larger than the current node (for a min-heap) or when there are no children.
-- Python's `heapq` module gives you a min-heap for free: `heapq.heappush(h, val)` and `heapq.heappop(h)`. Use it to verify your implementation produces the same results.
-- Tuples in a heap are compared element by element — `(priority, item)` lets you use the tuple directly with `heapq` without extra configuration.
+Now that you have a heap, building a priority queue is straightforward:
+- `push(priority, item)` → insert a `(priority, item)` tuple. Python compares tuples from left to right, so the heap automatically orders by priority number.
+- `pop()` → remove and return the item with the smallest priority number (highest urgency)
 
 ---
 
@@ -165,26 +121,35 @@ while not pq.is_empty():
 
 **File to create:** `module_11/heap.py`
 
-You will implement a `MinHeap` class from scratch using a plain Python list, then build a `PriorityQueue` on top of it. Work through each step in order.
+---
+
+### Step 1 — `MinHeap` skeleton
+
+```python
+class MinHeap:
+    def __init__(self):
+        self._data = []
+
+    def __len__(self):
+        return len(self._data)
+
+    def __str__(self):
+        return f"MinHeap: {self._data}"
+
+    def is_empty(self):
+        return len(self._data) == 0
+
+    def peek(self):
+        if self.is_empty():
+            raise IndexError("Heap is empty")
+        return self._data[0]
+```
 
 ---
 
-### Step 1 — `MinHeap` class skeleton
+### Step 2 — `push(value)` with `_sift_up`
 
-Create a `MinHeap` class with:
-- `self._data = []` — the backing list
-- `__len__` returning `len(self._data)`
-- `__str__` returning `f"MinHeap: {self._data}"`
-- `is_empty()` returning `True` when the heap is empty
-- `peek()` returning `self._data[0]`; raise `IndexError` if empty
-
----
-
-### Step 2 — `push(value)`
-
-Append `value` to the end of `_data`, then call `_sift_up()` to restore the heap property.
-
-Implement `_sift_up(index)` using the parent formula `(index - 1) // 2`.
+Append the value to the end of `_data`, then call `_sift_up` with its index.
 
 ```python
 h = MinHeap()
@@ -192,30 +157,34 @@ h.push(5)
 h.push(3)
 h.push(8)
 h.push(1)
-print(h)     # MinHeap: [1, 3, 8, 5]  (exact order may vary, but 1 must be first)
-print(h.peek())   # 1
+print(h)           # MinHeap: [1, 3, 8, 5]  — 1 must be first
+print(h.peek())    # 1
 ```
+
+The exact internal order depends on insertion order, but the root must always be the minimum.
 
 ---
 
-### Step 3 — `pop()`
+### Step 3 — `pop()` with `_sift_down`
 
-Swap the root with the last element, remove the last element (the old root), then call `_sift_down(0)` to restore the heap property.
-
-Implement `_sift_down(index)` using the left-child formula `2 * index + 1` and right-child formula `2 * index + 2`.
+1. If empty, raise `IndexError`
+2. Swap the root with the last item
+3. Remove the last item (old root) and save it
+4. Call `_sift_down(0)` to fix the heap
+5. Return the saved value
 
 ```python
-print(h.pop())   # 1  — smallest element
-print(h.pop())   # 3
-print(h.pop())   # 5
-print(h.pop())   # 8
+print(h.pop())    # 1
+print(h.pop())    # 3
+print(h.pop())    # 5
+print(h.pop())    # 8
 ```
+
+Items must come out in sorted (ascending) order.
 
 ---
 
-### Step 4 — Verify against `heapq`
-
-Add a block that pushes the same values into both your `MinHeap` and Python's `heapq`, then pops everything from both and compares:
+### Step 4 — Verify against Python's `heapq`
 
 ```python
 import heapq
@@ -233,23 +202,37 @@ for v in values:
 my_result  = [my_heap.pop() for _ in range(len(values))]
 ref_result = [heapq.heappop(reference) for _ in range(len(values))]
 
-assert my_result == ref_result, f"Mismatch!\nMine: {my_result}\nRef:  {ref_result}"
-print("Heap verified:", my_result)   # [1, 2, 3, 4, 5, 6, 7, 8, 9]
+assert my_result == ref_result, f"Mismatch!\nMine: {my_result}\nRef: {ref_result}"
+print("Heap verified:", my_result)    # [1, 2, 3, 4, 5, 6, 7, 8, 9]
 ```
 
 ---
 
 ### Step 5 — `PriorityQueue` class
 
-Build a `PriorityQueue` class on top of your `MinHeap`. Lower priority number = higher urgency (served first).
+Build a `PriorityQueue` on top of `MinHeap`. Store `(priority, item)` tuples.
 
-| Method                    | Behavior                                                   |
-|---------------------------|------------------------------------------------------------|
-| `push(priority, item)`    | Insert `(priority, item)` as a tuple into the heap        |
-| `pop()`                   | Remove and return the `item` with the lowest priority number |
-| `peek()`                  | Return the `item` with the lowest priority without removing it |
-| `is_empty()`              | Return `True` if the queue is empty                        |
+```python
+class PriorityQueue:
+    def __init__(self):
+        self._heap = MinHeap()
 
+    def push(self, priority, item):
+        self._heap.push((priority, item))
+
+    def pop(self):
+        priority, item = self._heap.pop()
+        return item
+
+    def peek(self):
+        priority, item = self._heap.peek()
+        return item
+
+    def is_empty(self):
+        return self._heap.is_empty()
+```
+
+Test it:
 ```python
 pq = PriorityQueue()
 pq.push(3, "Low priority report")
@@ -265,34 +248,38 @@ while not pq.is_empty():
 # Low priority report
 ```
 
-> **Hint:** Store tuples `(priority, item)` in the heap. Python compares tuples element by element, so the heap will order by priority automatically.
-
 ---
 
 ### Step 6 — Hospital triage demo
 
-Write a `triage_demo()` function that simulates a hospital emergency room:
+```python
+def triage_demo():
+    er = PriorityQueue()
+    er.push(1, "Cardiac arrest")
+    er.push(3, "Sprained ankle")
+    er.push(2, "Broken arm")
+    er.push(1, "Severe bleeding")
+    er.push(3, "Mild headache")
+    er.push(2, "Possible fracture")
 
-1. Create a `PriorityQueue`.
-2. Add at least 6 patients, each with a triage priority (1 = critical, 2 = urgent, 3 = stable) and a name.
-3. Process all patients in priority order, printing `"Treating: <name> (priority <n>)"` for each.
+    print("=== Emergency Room Triage ===")
+    while not er.is_empty():
+        patient = er.pop()
+        print(f"Treating next: {patient}")
 
+triage_demo()
 ```
-Treating: Cardiac arrest patient (priority 1)
-Treating: Severe trauma patient (priority 1)
-Treating: Broken arm patient (priority 2)
-Treating: Sprained ankle patient (priority 3)
-...
-```
+
+Expected: cardiac arrest and severe bleeding go first (priority 1), then broken arm and possible fracture (priority 2), then the others (priority 3).
 
 ---
 
 ### Checklist Before Submitting
 
-- [ ] `MinHeap.push()` correctly sifts up and maintains the heap property.
-- [ ] `MinHeap.pop()` correctly sifts down; raises `IndexError` on empty heap.
-- [ ] `MinHeap.peek()` raises `IndexError` on empty heap.
-- [ ] The `heapq` verification block passes the assertion.
-- [ ] `PriorityQueue.push()` and `.pop()` work correctly (items come out lowest-priority-number first).
-- [ ] Two items with the same priority can both be stored (no crash).
-- [ ] `triage_demo()` runs and prints patients in priority order.
+- [ ] `MinHeap.push()` maintains the heap property (smallest at index 0)
+- [ ] `MinHeap.pop()` always removes and returns the smallest item
+- [ ] `MinHeap.peek()` and `pop()` raise `IndexError` on an empty heap
+- [ ] The `heapq` verification assertion passes
+- [ ] `PriorityQueue.push()` and `pop()` work correctly (lowest number = first out)
+- [ ] Two items with the same priority can both be stored
+- [ ] `triage_demo()` prints patients in priority order (1s before 2s before 3s)

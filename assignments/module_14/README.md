@@ -1,122 +1,135 @@
 # Week 14 — Algorithmic Paradigms
-
-An **algorithmic paradigm** is a high-level strategy for solving a class of problems. This week you study three of the most important: **greedy algorithms**, **divide and conquer**, and you see how they compare to **dynamic programming** (next week). Understanding which paradigm to apply — and why — is a key problem-solving skill.
+### Greedy Algorithms, Divide and Conquer, and Maximum Subarray
 
 ---
 
-## Concepts Covered
+## Welcome!
 
-### 1. Greedy Algorithms
+Up to now you've learned specific algorithms for specific problems. This week you zoom out and learn **general strategies** — ways of thinking about whole *families* of problems. Once you know these patterns, you'll recognize them in new problems you've never seen before.
 
-A **greedy algorithm** makes the locally optimal choice at each step, hoping that these local choices lead to a globally optimal solution.
+---
 
-**Key question to ask:** "Does choosing the best option right now always lead to the best overall answer?" If yes, a greedy approach works. If no, you need dynamic programming.
+## Concept 1: What Is an Algorithmic Paradigm?
 
-#### Activity Selection Problem
+A **paradigm** is a general approach or philosophy for solving problems.
 
-Given a set of activities with start and end times, select the maximum number of non-overlapping activities.
+**Analogy:** In cooking, there are general strategies: "sauté then deglaze," "low and slow," "mise en place." Once you know these strategies, you can apply them to many different recipes. Algorithmic paradigms are the same thing — general strategies you apply to many different coding problems.
 
-**Greedy strategy:** Always pick the activity that finishes earliest (leaves the most room for future activities).
+The three you'll learn this week:
+
+1. **Greedy** — always make the locally best choice right now
+2. **Divide and Conquer** — split the problem, solve the parts, combine
+3. **Dynamic Programming** (preview) — like divide and conquer, but cache repeated work
+
+---
+
+## Concept 2: Greedy Algorithms
+
+A **greedy algorithm** makes the decision that looks best *at this moment*, without looking ahead. It never goes back and reconsiders.
+
+**Analogy:** Imagine you're hiking and want to reach the highest peak. A greedy hiker always takes the steepest step available right now. Sometimes this works perfectly. Sometimes you end up on a small hill and the actual peak is in the other direction — because the greedy choice now led you wrong.
+
+**The key question:** Does always choosing the locally best option guarantee the globally best result?
+
+If yes → greedy works! ✅
+If no → you need Dynamic Programming ❌
+
+### Activity Selection (Greedy Works Here)
+
+**Problem:** You have a list of events, each with a start and end time. You can only attend one event at a time. What's the maximum number of events you can attend?
+
+**Greedy strategy:** Always pick the event that ends soonest — it leaves the most time available for future events.
+
+```
+Events: (1,4), (3,5), (0,6), (5,7), (3,9), (5,9), (6,10), (8,11)
+Sorted by end time:
+  (1,4), (3,5), (0,6), (5,7), (3,9), (5,9), (6,10), (8,11)
+
+Pick (1,4)   — first to end
+Skip (3,5)   — starts at 3, but (1,4) ends at 4; 3 < 4, conflict
+Skip (0,6)   — starts at 0 < 4, conflict
+Pick (5,7)   — starts at 5 ≥ 4, no conflict ✅
+Skip (3,9)   — starts at 3 < 7, conflict
+Skip (5,9)   — starts at 5 < 7, conflict
+Skip (6,10)  — starts at 6 < 7, conflict
+Pick (8,11)  — starts at 8 ≥ 7 ✅
+
+Result: 3 events: (1,4), (5,7), (8,11)
+```
 
 ```python
 def activity_selection(activities):
-    # Sort by finish time
-    sorted_acts = sorted(activities, key=lambda x: x[1])
+    sorted_acts = sorted(activities, key=lambda x: x[1])   # Sort by END time
     selected = [sorted_acts[0]]
 
     for start, end in sorted_acts[1:]:
-        # Only pick if this activity starts after the last selected one ends
-        if start >= selected[-1][1]:
+        if start >= selected[-1][1]:    # Starts after last selected one ends?
             selected.append((start, end))
 
     return selected
-
-activities = [(1, 4), (3, 5), (0, 6), (5, 7), (3, 9), (5, 9), (6, 10), (8, 11)]
-print(activity_selection(activities))
-# [(1, 4), (5, 7), (8, 11)]  — 3 non-overlapping activities
 ```
 
-Why greedy works here: finishing early is always at least as good as any other choice — it never prevents a future choice that would have been possible otherwise.
+### When Greedy Fails
+
+Greedy doesn't always work. Consider making change with coins [10, 6, 1] for a target of 12:
+- Greedy (take the biggest coin first): 10 + 1 + 1 = **3 coins**
+- Optimal: 6 + 6 = **2 coins**
+
+Greedy fails here because picking 10 traps you into needing two 1s.
 
 ---
 
-### 2. Greedy Does Not Always Work
+## Concept 3: Divide and Conquer
 
-Consider the coin change problem: make 30 cents with coins [25, 10, 5, 1].
+**Divide and Conquer** splits a big problem into smaller independent pieces, solves each piece (often recursively), and combines the results.
 
-Greedy (always pick the largest coin): 25 + 5 = 2 coins. ✓ Works here.
+**Analogy:** You're cleaning a messy house. It's overwhelming as one task. But split it: one person does the kitchen, one does the living room, one does the bedrooms. Each smaller task is easier, and when everyone finishes, the whole house is clean.
 
-But with coins [10, 6, 1] and target 12:
-- Greedy: 10 + 1 + 1 = 3 coins.
-- Optimal: 6 + 6 = 2 coins. ✗ Greedy fails.
+You've already used divide and conquer:
+- **Merge sort**: split list in half, sort each half, merge
+- **Binary search**: cut the search space in half each step
 
-When greedy fails, use **dynamic programming** (Week 15).
+The key: **the sub-problems must be independent** (solving one doesn't affect the other). If they overlap (same sub-problem appears multiple times), you need Dynamic Programming.
 
----
+### Maximum Subarray — Kadane's Algorithm
 
-### 3. Divide and Conquer
+**Problem:** Given a list of numbers (including negatives), find the contiguous subarray with the largest sum.
 
-**Divide and conquer** splits a problem into smaller subproblems, solves each independently, and combines the results.
+```
+[-2, 1, -3, 4, -1, 2, 1, -5, 4]
+              ^^^^^^^^^
+The subarray [4, -1, 2, 1] has sum 6 — the maximum possible.
+```
 
-The three steps:
-1. **Divide:** Split the problem into subproblems.
-2. **Conquer:** Solve each subproblem (often recursively).
-3. **Combine:** Merge the results.
+**Kadane's Algorithm** solves this with a clever greedy/DP hybrid in O(n):
 
-You have already seen divide and conquer in:
-- **Merge sort** (divide the list, sort each half, merge)
-- **Binary search** (halve the search space each step)
-
----
-
-### 4. Maximum Subarray Sum (Kadane's Algorithm)
-
-Find the contiguous subarray within a list that has the largest sum.
-
-**Divide and conquer approach** (O(n log n)):
-- Recursively solve the left and right halves.
-- Find the maximum subarray that crosses the midpoint.
-- Return the maximum of the three.
-
-**Kadane's Algorithm** — a simpler O(n) greedy/DP hybrid:
+At each position, ask: "Am I better off **extending** the current running total, or **starting fresh** from just this number?"
 
 ```python
-def max_subarray(nums):
+def max_subarray_kadane(nums):
     max_sum = nums[0]
     current_sum = nums[0]
 
     for num in nums[1:]:
-        # Either extend the current subarray or start fresh
-        current_sum = max(num, current_sum + num)
-        max_sum = max(max_sum, current_sum)
+        current_sum = max(num, current_sum + num)  # Extend or start fresh?
+        max_sum = max(max_sum, current_sum)         # Is this a new maximum?
 
     return max_sum
-
-print(max_subarray([-2, 1, -3, 4, -1, 2, 1, -5, 4]))  # 6  (subarray [4,-1,2,1])
 ```
 
-The key decision at each step: "Is it better to add this number to the running sum, or start a new subarray from here?"
-
----
-
-### 5. Greedy vs. Divide and Conquer vs. Dynamic Programming
-
-| Paradigm              | Strategy                                          | When to use                                             |
-|-----------------------|---------------------------------------------------|---------------------------------------------------------|
-| Greedy                | Make the locally best choice at each step         | When local optimality guarantees global optimality      |
-| Divide and conquer    | Split, solve independently, combine               | When subproblems are independent (no overlap)           |
-| Dynamic Programming   | Split, solve, **cache** repeated subproblems      | When subproblems overlap (same sub-problem solved twice)|
-
----
-
-## Hints for This Week's Assignment
-
-- **Prove your greedy is correct (informally).** Ask: "Can I construct a counterexample where the greedy choice fails?" If you can, you need DP.
-- For activity selection, sorting by finish time is the key insight. Try sorting by start time or duration — you'll see those give wrong answers.
-- Kadane's algorithm has only two decisions per step: extend or restart. If you understand those two lines, you understand the algorithm.
-- For divide and conquer problems, identify: (1) how to divide, (2) what the base case is, (3) how to combine results.
-- The maximum subarray that **crosses the midpoint** in the divide-and-conquer approach is found by scanning outward from the midpoint in both directions — don't skip this step.
-- Think about edge cases: all-negative arrays (the max subarray is the single largest value), single-element arrays, and arrays of all zeros.
+Trace through `[-2, 1, -3, 4, -1, 2, 1, -5, 4]`:
+```
+num=-2: current=-2, max=-2
+num= 1: current=max(1, -2+1)=max(1,-1)=1,  max=1
+num=-3: current=max(-3, 1-3)=max(-3,-2)=-2, max=1
+num= 4: current=max(4, -2+4)=max(4,2)=4,   max=4
+num=-1: current=max(-1, 4-1)=max(-1,3)=3,  max=4
+num= 2: current=max(2, 3+2)=max(2,5)=5,    max=5
+num= 1: current=max(1, 5+1)=max(1,6)=6,    max=6
+num=-5: current=max(-5, 6-5)=max(-5,1)=1,  max=6
+num= 4: current=max(4, 1+4)=max(4,5)=5,    max=6
+```
+Answer: 6 ✅
 
 ---
 
@@ -124,13 +137,11 @@ The key decision at each step: "Is it better to add this number to the running s
 
 **File to create:** `module_14/paradigms.py`
 
-You will implement three greedy algorithms, Kadane's algorithm, and a divide-and-conquer maximum subarray — then compare paradigms. Work through each step in order.
-
 ---
 
 ### Step 1 — `activity_selection(activities)`
 
-Given a list of `(start, end)` tuples, return the maximum set of non-overlapping activities.
+Implement the greedy activity selector described above. Return the list of selected `(start, end)` tuples.
 
 ```python
 activities = [(1,4), (3,5), (0,6), (5,7), (3,9), (5,9), (6,10), (8,11)]
@@ -138,131 +149,118 @@ print(activity_selection(activities))
 # [(1, 4), (5, 7), (8, 11)]
 ```
 
-**Steps to implement:**
-1. Sort `activities` by finish time (second element of each tuple).
-2. Always pick the activity with the earliest finish time that starts at or after the last selected activity ended.
-
-Test with your own set of activities and verify the result is truly non-overlapping.
+Verify: make sure no two selected activities overlap.
 
 ---
 
 ### Step 2 — `coin_change_greedy(coins, amount)`
 
-Given a **sorted (descending) list of coin denominations** and a target amount, return the minimum list of coins using a greedy approach (always take the largest coin that fits).
+Given coins sorted largest-first, always take the biggest coin that fits. Return the list of coins used.
 
 ```python
 print(coin_change_greedy([25, 10, 5, 1], 41))
-# [25, 10, 5, 1]  → 4 coins
+# [25, 10, 5, 1]  — 4 coins
 
 print(coin_change_greedy([25, 10, 5, 1], 30))
-# [25, 5]  → 2 coins
+# [25, 5]  — 2 coins
 ```
 
-Then show that greedy **fails** with non-standard coins:
+Now show the failure case. Add a comment explaining why greedy fails:
 
 ```python
-# With coins [10, 6, 1], target 12:
-print(coin_change_greedy([10, 6, 1], 12))
-# [10, 1, 1]  → 3 coins  ← WRONG (optimal is [6, 6] = 2 coins)
+result = coin_change_greedy([10, 6, 1], 12)
+print(result)   # [10, 1, 1]  — 3 coins (WRONG — optimal is [6, 6] = 2 coins)
+# COMMENT: Greedy fails here because choosing 10 makes it impossible to use 6+6.
+# Dynamic Programming (Week 15) handles this correctly.
 ```
-
-Add a comment: `# Greedy fails here — DP needed (see module 15)`
 
 ---
 
 ### Step 3 — `max_subarray_kadane(nums)`
 
-Implement Kadane's algorithm. Return the **maximum subarray sum** (not the subarray itself — just the sum).
+Implement Kadane's algorithm. Return only the **sum** (not the subarray itself).
 
 ```python
-print(max_subarray_kadane([-2, 1, -3, 4, -1, 2, 1, -5, 4]))   # 6
-print(max_subarray_kadane([1, 2, 3, 4, 5]))                    # 15
-print(max_subarray_kadane([-3, -1, -4, -2]))                   # -1  (all negative)
-print(max_subarray_kadane([0, 0, 0]))                          # 0
+print(max_subarray_kadane([-2, 1, -3, 4, -1, 2, 1, -5, 4]))  # 6
+print(max_subarray_kadane([1, 2, 3, 4, 5]))                   # 15
+print(max_subarray_kadane([-3, -1, -4, -2]))                  # -1 (all negative!)
+print(max_subarray_kadane([0, 0, 0]))                         # 0
 ```
 
-**Edge case:** When all numbers are negative, the maximum subarray is the single largest (least negative) number.
+For all-negative arrays: the maximum subarray is the single largest (least negative) number. Your code should handle this correctly without any special case, because `max(num, current_sum + num)` naturally picks the larger option.
 
 ---
 
 ### Step 4 — `max_subarray_indices(nums)`
 
-Extend Kadane's to also return the **start and end indices** of the maximum subarray (not just the sum).
+Extend Kadane's to also return the **start and end indices** of the best subarray.
 
 ```python
 total, start, end = max_subarray_indices([-2, 1, -3, 4, -1, 2, 1, -5, 4])
-print(total, start, end)      # 6 3 6
-print(nums[start:end+1])      # [4, -1, 2, 1]
+print(total, start, end)    # 6 3 6
+nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
+print(nums[start:end+1])    # [4, -1, 2, 1]
 ```
 
-**Hint:** Track `current_start` (resets when you start fresh), and update `best_start, best_end` whenever you find a new max.
+**Hint:** Track `current_start` (the start of the current running total). When you start fresh (`current_sum = num`), update `current_start = current_index`. When you update `max_sum`, save `best_start = current_start` and `best_end = current_index`.
 
 ---
 
-### Step 5 — `max_subarray_divide_conquer(nums)`
+### Step 5 — Classroom scheduler
 
-Implement the divide-and-conquer version. This function must:
-1. If `len(nums) == 1`, return `nums[0]` (base case).
-2. Split the list in half.
-3. Recursively find the max subarray sum in the **left half**.
-4. Recursively find the max subarray sum in the **right half**.
-5. Find the max subarray sum that **crosses the midpoint** (scan outward from the midpoint in both directions).
-6. Return the maximum of the three.
+Use `activity_selection` to solve a real scheduling problem:
 
 ```python
-print(max_subarray_divide_conquer([-2, 1, -3, 4, -1, 2, 1, -5, 4]))   # 6
-```
+def schedule_classes(requests):
+    # requests is a list of (student_name, start_hour, end_hour)
+    # Schedule the maximum number of non-overlapping classes
+    # Print a readable schedule
 
-Verify it matches Kadane's result.
+    activities = [(start, end, name) for name, start, end in requests]
+    # Hint: sort by end time (index 1), then apply greedy selection
 
----
-
-### Step 6 — Greedy class scheduler
-
-Write a function `schedule_classes(requests)` where `requests` is a list of `(student_name, start, end)` tuples. Use your activity selection algorithm to schedule the maximum number of classes in a single classroom, then print a schedule:
-
-```python
 requests = [
-    ("Alice", 9, 10),
-    ("Bob", 9, 11),
-    ("Carol", 10, 11),
-    ("David", 11, 13),
-    ("Eve", 12, 14),
-    ("Frank", 13, 15),
+    ("Alice",  9, 10),
+    ("Bob",    9, 11),
+    ("Carol",  10, 11),
+    ("David",  11, 13),
+    ("Eve",    12, 14),
+    ("Frank",  13, 15),
 ]
 schedule_classes(requests)
-# Selected 4 classes:
-#   Alice    : 9:00 - 10:00
-#   Carol    : 10:00 - 11:00
-#   David    : 11:00 - 13:00
-#   Frank    : 13:00 - 15:00
+```
+
+Expected output:
+```
+Selected 4 classes:
+  Alice  : 9:00 - 10:00
+  Carol  : 10:00 - 11:00
+  David  : 11:00 - 13:00
+  Frank  : 13:00 - 15:00
 ```
 
 ---
 
-### Step 7 — Paradigm comparison comment block
-
-At the top of your file, add a docstring summarizing when to use each paradigm:
+### Step 6 — Paradigm summary at the top of your file
 
 ```python
 """
-Paradigm Comparison
--------------------
-Greedy:
-  - Makes locally optimal choice at each step.
-  - Fast (usually O(n log n) due to sorting).
-  - Works for: activity selection, fractional knapsack, Huffman coding.
-  - Does NOT work for: coin change with arbitrary coins, 0/1 knapsack.
+Algorithmic Paradigm Cheat Sheet
+---------------------------------
+GREEDY:
+  - Make the locally best choice at each step, never look back.
+  - Works when: local optimality = global optimality (activity selection, Huffman).
+  - Fails when: local optimality misleads (coin change with weird coins, knapsack).
 
-Divide and Conquer:
+DIVIDE AND CONQUER:
   - Split → solve independently → combine.
-  - Works for: merge sort, binary search, max subarray.
-  - Subproblems must be INDEPENDENT (no overlap).
+  - Sub-problems are INDEPENDENT (no overlap).
+  - Examples: merge sort, binary search, max subarray (divide-and-conquer version).
 
-Dynamic Programming:
-  - Split → solve → CACHE repeated subproblems.
-  - Use when greedy fails and subproblems overlap.
-  - Works for: coin change, knapsack, LCS (see module 15).
+DYNAMIC PROGRAMMING (Week 15 preview):
+  - Like divide and conquer, but sub-problems OVERLAP.
+  - Cache results so you never solve the same sub-problem twice.
+  - Examples: coin change, knapsack, Fibonacci, LCS.
 """
 ```
 
@@ -270,10 +268,11 @@ Dynamic Programming:
 
 ### Checklist Before Submitting
 
-- [ ] `activity_selection()` returns the correct non-overlapping set sorted by finish time.
-- [ ] `coin_change_greedy()` works correctly for standard coins and demonstrates failure for `[10, 6, 1]`.
-- [ ] `max_subarray_kadane()` handles all-negative arrays and all-zero arrays.
-- [ ] `max_subarray_indices()` returns correct sum, start index, and end index.
-- [ ] `max_subarray_divide_conquer()` returns the same answer as Kadane's for all test cases.
-- [ ] `schedule_classes()` prints a readable schedule.
-- [ ] The paradigm comparison docstring is present at the top of the file.
+- [ ] `activity_selection()` returns the correct non-overlapping set
+- [ ] `coin_change_greedy()` works correctly with standard coins
+- [ ] `coin_change_greedy([10,6,1], 12)` shows the greedy failure (returns 3 coins, not 2)
+- [ ] A comment explains why greedy fails for that case
+- [ ] `max_subarray_kadane()` handles all-negative arrays without a special case
+- [ ] `max_subarray_indices()` returns correct sum, start, and end index
+- [ ] `schedule_classes()` prints a readable schedule with correct selections
+- [ ] The paradigm summary docstring is present at the top of the file

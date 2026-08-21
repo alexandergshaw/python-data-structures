@@ -1,151 +1,181 @@
 # Week 2 — Python Basics II
-
-This week you move from storing values to **controlling the flow** of your program. You will decide what code runs (conditionals), repeat code automatically (loops), validate user input, and use `break` and `continue` to fine-tune loop behavior.
+### Conditionals, Loops, Input Validation, break, and continue
 
 ---
 
-## Concepts Covered
+## Welcome Back!
 
-### 1. Conditionals (`if` / `elif` / `else`)
+Last week your programs ran straight through from top to bottom — one step, then the next, then the next. This week you learn to make decisions (run some code only sometimes) and repeat things automatically (run code many times without copying and pasting). These two ideas — decision-making and repetition — are at the heart of almost every program ever written.
 
-A conditional runs a block of code only when a condition is `True`.
+---
+
+## Concept 1: Conditionals (`if` / `elif` / `else`)
+
+An `if` statement is a **fork in the road**. Your program checks a condition, and depending on whether it's true or false, it takes one path or the other.
+
+**Real life analogy:** Imagine you're deciding what to wear.
+- *If* it's raining → wear a raincoat
+- *Otherwise, if* it's cold → wear a jacket
+- *Otherwise* → wear a t-shirt
+
+In Python:
 
 ```python
-score = 85
+weather = "raining"
 
-if score >= 90:
-    print("A")
-elif score >= 80:
-    print("B")
-elif score >= 70:
-    print("C")
+if weather == "raining":
+    print("Wear a raincoat")
+elif weather == "cold":
+    print("Wear a jacket")
 else:
-    print("Below C")
+    print("Wear a t-shirt")
 ```
 
-- **Indentation is required.** Python uses 4 spaces (or 1 tab) to define a block. Everything indented under an `if` only runs when that condition is met.
-- `elif` means "else if" — you can have as many as you need.
-- `else` is the catch-all that runs when no earlier condition matched.
+**Things to notice:**
+- The condition is always followed by a colon `:`
+- The code *inside* the if block is **indented** (pushed in with 4 spaces). Python uses indentation to know what's "inside" the block. If you forget the indent, you get an error.
+- `elif` means "else if" — it only runs if all previous conditions were false.
+- `else` is the fallback — it runs if nothing above matched.
 
 ---
 
-### 2. Comparison Operators
+## Concept 2: Comparison Operators
 
-These return `True` or `False` and are the building blocks of conditions:
+These are the tools you use to build conditions. They all produce either `True` or `False`:
 
-| Operator | Meaning                  | Example          |
-|----------|--------------------------|------------------|
-| `==`     | Equal to                 | `5 == 5` → True  |
-| `!=`     | Not equal to             | `5 != 3` → True  |
-| `>`      | Greater than             | `7 > 3` → True   |
-| `<`      | Less than                | `2 < 9` → True   |
-| `>=`     | Greater than or equal to | `5 >= 5` → True  |
-| `<=`     | Less than or equal to    | `4 <= 6` → True  |
+| Operator | Meaning | Example | Result |
+|----------|---------|---------|--------|
+| `==` | Is equal to? | `5 == 5` | `True` |
+| `!=` | Is NOT equal to? | `5 != 3` | `True` |
+| `>` | Greater than? | `7 > 3` | `True` |
+| `<` | Less than? | `2 < 9` | `True` |
+| `>=` | Greater than or equal? | `5 >= 5` | `True` |
+| `<=` | Less than or equal? | `4 <= 3` | `False` |
 
-> **Common mistake:** Using `=` (assignment) inside an `if` instead of `==` (comparison). `if x = 5:` is a `SyntaxError`.
-
----
-
-### 3. Logical Operators
-
-Combine multiple conditions:
-
-| Operator | Meaning                            | Example                         |
-|----------|------------------------------------|----------------------------------|
-| `and`    | Both must be True                  | `age >= 18 and has_id == True`  |
-| `or`     | At least one must be True          | `day == "Sat" or day == "Sun"`  |
-| `not`    | Reverses True/False                | `not is_raining`                |
+⚠️ **The most common beginner mistake:** Using `=` (which *assigns* a value) instead of `==` (which *compares* values).
 
 ```python
-temp = 75
-is_sunny = True
+# WRONG — this tries to assign 5 inside an if, which is an error:
+if x = 5:
 
-if temp > 70 and is_sunny:
-    print("Great day for a walk!")
+# CORRECT — this checks whether x equals 5:
+if x == 5:
 ```
 
 ---
 
-### 4. `for` Loops
+## Concept 3: Logical Operators (Combining Conditions)
 
-A `for` loop repeats code a fixed number of times or over every item in a sequence.
+Sometimes you need to check two things at once:
+
+- `and` — BOTH conditions must be true
+- `or` — AT LEAST ONE condition must be true
+- `not` — flips true to false, and vice versa
 
 ```python
-# Count from 0 to 4
+age = 20
+has_ticket = True
+
+if age >= 18 and has_ticket:
+    print("You can enter.")
+
+if age < 13 or age > 65:
+    print("Discounted ticket!")
+
+if not has_ticket:
+    print("You need a ticket first.")
+```
+
+**Analogy for `and`:** A car needs BOTH the key turned AND the gas pedal pressed to move. One without the other doesn't work.
+
+**Analogy for `or`:** A vending machine accepts coins OR bills. Either one works.
+
+---
+
+## Concept 4: `for` Loops — Repeating a Fixed Number of Times
+
+A `for` loop runs a block of code once for each item in a sequence. Think of it as a checklist — it goes through every item, one at a time.
+
+**Analogy:** You have a shopping list with 5 items. You go through each item on the list, pick it up, and check it off. The `for` loop does the same thing with code.
+
+```python
+# Print numbers 0 through 4:
 for i in range(5):
     print(i)
+# Output: 0, 1, 2, 3, 4
 
-# Iterate over a list
+# Go through every item in a list:
 fruits = ["apple", "banana", "cherry"]
 for fruit in fruits:
-    print(fruit)
+    print(f"I like {fruit}")
 ```
 
-`range(start, stop, step)` generates a sequence of integers:
-- `range(5)` → 0, 1, 2, 3, 4
-- `range(1, 6)` → 1, 2, 3, 4, 5
-- `range(0, 10, 2)` → 0, 2, 4, 6, 8
+`range(5)` generates the numbers 0, 1, 2, 3, 4. Think of it as a numbered list of 5 items.
+
+- `range(1, 6)` → 1, 2, 3, 4, 5 (start at 1, stop before 6)
+- `range(0, 10, 2)` → 0, 2, 4, 6, 8 (start at 0, stop before 10, count by 2s)
 
 ---
 
-### 5. `while` Loops
+## Concept 5: `while` Loops — Repeating Until Something Changes
 
-A `while` loop keeps running as long as its condition remains `True`.
+A `while` loop keeps running as long as a condition is true. It checks the condition before each repetition, and stops when the condition becomes false.
+
+**Analogy:** You keep hitting the snooze button on your alarm *while* you're tired. As soon as you feel awake (condition becomes false), you stop hitting snooze.
 
 ```python
 count = 0
 while count < 5:
     print(count)
-    count += 1   # Don't forget to update the variable!
+    count += 1    # This is CRUCIAL — without it, count never changes and you loop forever
 ```
 
-> **Danger — infinite loop:** If the condition never becomes `False`, the loop runs forever. Always make sure something inside the loop will eventually make the condition False, or use `break`.
+⚠️ **Danger — the infinite loop:** If the condition in your `while` loop never becomes false, your program runs forever. Always make sure something inside the loop moves you closer to the condition being false.
 
 ---
 
-### 6. Input Validation
+## Concept 6: Input Validation — Demanding Correct Input
 
-Ask the user to re-enter data until they provide something valid:
+This is a classic use of `while` loops: keep asking the user until they give you something valid.
+
+**Analogy:** A hotel check-in desk won't give you a key until you show ID. They keep asking until you produce it.
 
 ```python
 age = int(input("Enter your age: "))
 while age < 0 or age > 120:
-    print("Invalid age. Please try again.")
+    print("That doesn't look right. Try again.")
     age = int(input("Enter your age: "))
-print(f"Your age is {age}.")
+
+print(f"Got it — you are {age} years old.")
 ```
 
 ---
 
-### 7. `break` and `continue`
+## Concept 7: `break` — Emergency Exit from a Loop
 
-`break` immediately **exits** the loop, no matter what:
+`break` immediately quits the loop, no matter what. Think of it as a fire exit — you use it when you need to get out right now.
 
 ```python
 for i in range(10):
     if i == 5:
-        break        # Stop the loop at 5
-    print(i)         # Prints 0, 1, 2, 3, 4
-```
-
-`continue` **skips the rest of the current iteration** and jumps to the next one:
-
-```python
-for i in range(10):
-    if i % 2 == 0:
-        continue     # Skip even numbers
-    print(i)         # Prints 1, 3, 5, 7, 9
+        break        # Stop the loop immediately
+    print(i)
+# Prints: 0, 1, 2, 3, 4  (never reaches 5 or beyond)
 ```
 
 ---
 
-## Hints for This Week's Assignment
+## Concept 8: `continue` — Skip This Round
 
-- **Trace through your logic manually.** Before running the code, walk through it with a specific value and predict what each line will do.
-- **Test boundary values.** If your condition is `>= 18`, test with 17, 18, and 19.
-- **Avoid deeply nested `if` statements.** If you find yourself indenting 4+ levels, step back and think about whether `elif` or a different structure would be cleaner.
-- For input validation loops, remember that the code inside the loop runs **after** the first attempt, so you often need to get the input once before the loop and again inside the loop — or use a `while True:` loop with a `break`.
-- `break` and `continue` are powerful but can make code hard to follow — use them only when they make the logic clearer.
+`continue` skips the rest of the current loop iteration and jumps straight to the next one. Think of it as a "skip" button — you skip this item but keep going through the rest of the list.
+
+```python
+for i in range(10):
+    if i % 2 == 0:
+        continue       # Skip even numbers
+    print(i)
+# Prints: 1, 3, 5, 7, 9  (odd numbers only)
+```
 
 ---
 
@@ -153,13 +183,15 @@ for i in range(10):
 
 **File to create:** `module_02/control_flow.py`
 
-You will write a grade-report program that validates input, classifies scores, and prints statistics. Complete each step in order.
+You're going to build a grade-report program. It collects scores from the user, validates them, grades them, and prints stats. Follow each step — don't skip ahead.
 
 ---
 
-### Step 1 — Collect a valid number of students
+### Step 1 — Ask how many students there are
 
-Ask the user how many students are in the class. The number must be between 1 and 50 (inclusive). Keep asking until they enter a valid number.
+Ask the user to enter the number of students. Store it in a variable called `count`.
+
+Validate it: the number must be between 1 and 50. If they enter something outside that range, print an error message and ask again. Keep asking until the number is valid.
 
 ```
 How many students? -3
@@ -167,42 +199,45 @@ Invalid. Enter a number between 1 and 50: 0
 Invalid. Enter a number between 1 and 50: 5
 ```
 
-**Hint:** Use a `while` loop that checks `count < 1 or count > 50`.
+Use a `while` loop for the validation.
 
 ---
 
 ### Step 2 — Collect a score for each student
 
-Use a `for` loop that runs exactly `count` times. Inside the loop, ask for a score between 0 and 100. Validate each score with a `while` loop before accepting it.
+Use a `for` loop that runs exactly `count` times. On each loop, ask the user for that student's score (0–100). Validate each score with an inner `while` loop before accepting it.
 
 ```
 Enter score for student 1 (0-100): 150
 Invalid score. Try again: 85
 Enter score for student 2 (0-100): 92
-...
 ```
 
-Store all valid scores in a list called `scores`.
+Store all valid scores in a list. Start with `scores = []` before the loop, and use `scores.append(score)` inside to add each valid score.
 
 ---
 
-### Step 3 — Skip incomplete scores with `continue`
+### Step 3 — Handle the "skip" case with `continue`
 
-Before storing a score, check if it is exactly `-1`. If it is, print `"Skipping student X"` and use `continue` to move to the next student without adding anything to `scores`. (This simulates a student who didn't take the test.)
+Before accepting a score, check if it equals `-1`. A score of `-1` means the student was absent. If it is:
+- Print `"Skipping student X"` (where X is the student number)
+- Use `continue` to move to the next student without adding anything to `scores`
 
-> Note: `-1` should bypass the 0–100 validation — handle it before the validation loop.
+So `-1` bypasses the 0–100 validation — check for it first, before the validation loop.
 
 ---
 
-### Step 4 — Stop early with `break`
+### Step 4 — Handle the "stop early" case with `break`
 
-Add a secret exit: if the user enters `999`, print `"Early exit triggered."` and use `break` to stop collecting scores immediately.
+Also before the validation loop, check if the score is `999`. If it is:
+- Print `"Early exit triggered."`
+- Use `break` to stop collecting scores immediately
 
 ---
 
 ### Step 5 — Print a letter grade for each score
 
-After collecting all scores, loop through `scores` and print a line for each one:
+After the loop, go through every score in `scores` and print a line like this for each one:
 
 ```
 Student 1: 85 → B
@@ -217,15 +252,13 @@ Use this grading scale:
 - 60–69 → `D`
 - Below 60 → `F`
 
+Use `if / elif / else` to pick the right letter.
+
 ---
 
 ### Step 6 — Print class statistics
 
-After the grade list, print:
-- The **highest** score (use Python's built-in `max()`)
-- The **lowest** score (use `min()`)
-- The **average** score (sum divided by count — use `sum()` and `len()`)
-- The number of students who **passed** (score ≥ 60) and **failed**
+After the grade list, print a statistics block. Use Python's built-in `max()`, `min()`, `sum()`, and `len()` functions — no loops needed for this step.
 
 ```
 --- Class Statistics ---
@@ -235,14 +268,36 @@ Average: 76.40
 Passed: 8 | Failed: 2
 ```
 
+To count passed (≥ 60) and failed (< 60), loop through `scores` and count:
+
+```python
+passed = 0
+failed = 0
+for score in scores:
+    if score >= 60:
+        passed += 1
+    else:
+        failed += 1
+```
+
+Format the average to 2 decimal places with `:.2f`.
+
+---
+
+### Things to Watch Out For
+
+- If no scores were collected (all students were skipped or user hit 999 immediately), `scores` will be empty. Python's `max()` and `min()` crash on an empty list. Add a check: `if len(scores) > 0:` before printing statistics.
+- Test the `-1` skip and the `999` early exit to make sure they actually work.
+
 ---
 
 ### Checklist Before Submitting
 
-- [ ] Student count is validated (1–50, re-prompts on bad input).
-- [ ] Each score is validated (0–100, re-prompts on bad input).
-- [ ] `-1` skips the student using `continue`.
-- [ ] `999` exits the input loop early using `break`.
-- [ ] A letter grade is printed for every score using `if / elif / else`.
-- [ ] Statistics (highest, lowest, average, pass/fail count) are printed correctly.
-- [ ] The average is formatted to 2 decimal places.
+- [ ] Student count is validated (must be 1–50, keeps asking until valid)
+- [ ] Each score is validated (must be 0–100, unless `-1` or `999`)
+- [ ] `-1` skips the student using `continue`
+- [ ] `999` exits the input loop early using `break`
+- [ ] Letter grades are printed for each collected score using `if / elif / else`
+- [ ] Statistics (highest, lowest, average, pass/fail) print correctly
+- [ ] Average is formatted to 2 decimal places
+- [ ] Program doesn't crash if `scores` is empty

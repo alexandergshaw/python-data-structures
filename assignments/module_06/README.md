@@ -1,143 +1,158 @@
 # Week 6 — Linked Lists
-
-This week you build your first custom **data structure** from scratch. A linked list is a chain of objects (nodes) where each node holds a value and a pointer to the next node. It has very different strengths and weaknesses than a Python list, and understanding those differences is the point.
+### Nodes, Traversal, Append, Prepend, Deletion, and Trade-offs
 
 ---
 
-## Concepts Covered
+## Welcome!
 
-### 1. Nodes
+So far you've stored lists of data using Python's built-in list (`[]`). This week you build your own list from scratch — without using Python's built-in one. Why? Because building it yourself makes you understand what's happening under the hood, and because linked lists have real advantages in certain situations.
 
-A **node** is the fundamental unit of a linked list. Each node stores:
-1. A **value** (the data it holds)
-2. A **next** pointer (a reference to the next node, or `None` if it's the last)
+---
+
+## Concept 1: What's Wrong With Regular Lists?
+
+Python's built-in list stores all its items in a big block of memory, side by side. That makes looking up any item by number super fast (go to slot #5 → instant). But it has a cost:
+
+- **Inserting at the front** of a Python list means every single item has to shift over one spot to make room. With 1 million items, that's 1 million moves.
+- **Deleting from the front** has the same problem.
+
+A linked list solves this by using a completely different structure.
+
+---
+
+## Concept 2: Nodes — The Building Block
+
+A **node** is a tiny object that holds two things:
+1. A **value** (the actual data — a number, a name, etc.)
+2. A **next pointer** (a reference to the next node in the chain)
+
+**Analogy:** Think of a scavenger hunt. Each clue (node) tells you the answer AND where to find the next clue. The last clue says "you're done" (that's `None`).
 
 ```python
 class Node:
     def __init__(self, value):
         self.value = value
-        self.next = None   # Points to the next Node, or None
+        self.next = None    # Points to the next Node, or None if last
 ```
-
-Nodes are just objects. They know nothing about the list they're in — that's the linked list's job.
 
 ---
 
-### 2. Linked List Structure
+## Concept 3: The Linked List
 
-A **linked list** object keeps track of the **head** (the first node). Everything else is reached by following `next` pointers.
+A **linked list** is a chain of nodes. The list object itself only needs to keep track of the **head** (the first node). Everything else you find by following the chain.
 
 ```python
 class LinkedList:
     def __init__(self):
-        self.head = None   # Empty list — no nodes yet
+        self.head = None    # Empty list has no head
 ```
 
-A list with three elements looks like this in memory:
+A list with three items looks like this in memory:
 
 ```
-head → [10 | next] → [20 | next] → [30 | None]
+head → [10 | •]──→ [20 | •]──→ [30 | None]
 ```
+
+Each arrow is the `next` pointer pointing to the next node. The last node's `next` is `None` — that's how you know you've reached the end.
 
 ---
 
-### 3. Traversal
+## Concept 4: Traversal — Walking the Chain
 
-To visit every node, start at `head` and follow `next` until you reach `None`:
+To visit every node, start at `head` and follow the `next` pointers until you hit `None`:
 
 ```python
 def print_all(self):
-    current = self.head
+    current = self.head       # Start at the beginning
     while current is not None:
         print(current.value)
-        current = current.next   # Move to the next node
+        current = current.next    # Move to the next node
 ```
 
-> **Crucial:** Always save `current.next` before modifying `current.next`, or you will lose your place in the chain.
+**Critical rule:** Use a `current` variable to walk the list. **Never** move `self.head` forward — you'd lose track of where the list begins!
 
 ---
 
-### 4. Append (Add to End)
+## Concept 5: Append — Adding to the End
+
+1. Create a new node
+2. If the list is empty, the new node becomes the head
+3. Otherwise, walk to the last node (the one whose `next` is `None`)
+4. Point that last node's `next` to the new node
 
 ```python
 def append(self, value):
     new_node = Node(value)
-    if self.head is None:          # Empty list — new node becomes head
+    if self.head is None:              # Empty list
         self.head = new_node
         return
     current = self.head
-    while current.next is not None:  # Walk to the last node
+    while current.next is not None:    # Walk to the last node
         current = current.next
-    current.next = new_node          # Link last node to the new one
+    current.next = new_node            # Link the new node in
 ```
 
 ---
 
-### 5. Prepend (Add to Front)
+## Concept 6: Prepend — Adding to the Front (This is Fast!)
 
-Adding to the front is O(1) — no traversal needed!
+1. Create a new node
+2. Point the new node's `next` to the current head
+3. The new node becomes the new head
 
 ```python
 def prepend(self, value):
     new_node = Node(value)
-    new_node.next = self.head   # New node points to old head
-    self.head = new_node        # New node is now the head
+    new_node.next = self.head    # New node points to old head
+    self.head = new_node         # New node IS the new head
 ```
+
+**Analogy:** You're in a line at a theme park. Someone cuts to the front. They stand in front of the person who was first — they point to that person as the "next" — and now they ARE the new front of the line. O(1): no matter how long the line, this takes the same amount of time.
 
 ---
 
-### 6. Deletion
+## Concept 7: Deletion — Removing a Node
 
-To delete a node, you must update the **previous** node's `next` to skip over the target:
+To remove a node, you need to make the node **before** it skip over it:
+
+```
+Before: [A] → [B] → [C]
+After:  [A] ────────→ [C]   (B is gone)
+```
+
+You don't need to destroy B — just make sure nobody points to it anymore.
 
 ```python
 def delete(self, value):
     if self.head is None:
+        return                           # Nothing to delete
+
+    if self.head.value == value:
+        self.head = self.head.next       # Skip the head
         return
-    if self.head.value == value:   # Deleting the head
-        self.head = self.head.next
-        return
+
     current = self.head
     while current.next is not None:
         if current.next.value == value:
-            current.next = current.next.next   # Skip the target node
+            current.next = current.next.next   # Skip the target
             return
         current = current.next
 ```
 
----
-
-### 7. Edge Cases
-
-Always handle these or your code will crash:
-- **Empty list** — `self.head is None`. Check this at the start of every method.
-- **Single-element list** — deleting the head should leave `head = None`.
-- **Target not found** — searching or deleting a value that doesn't exist; decide whether to raise an error or do nothing.
-- **Deleting the head** — requires special handling (shown above).
+**Why check `current.next.value` instead of `current.value`?** Because to do the re-linking, you need to be sitting on the node *before* the one you're deleting. You need your hands on the previous node to update its `next`.
 
 ---
 
-### 8. Array vs. Linked List Trade-offs
+## Concept 8: Linked Lists vs. Python Lists — When to Use Which
 
-| Operation        | Python List (Array) | Linked List       |
-|------------------|---------------------|-------------------|
-| Access by index  | O(1)                | O(n)              |
-| Prepend          | O(n) — shift all    | O(1)              |
-| Append           | O(1) amortized      | O(n) without tail |
-| Delete (middle)  | O(n) — shift all    | O(n) to find, O(1) to remove |
-| Memory           | Contiguous block    | Scattered, extra pointer per node |
+| Operation | Python List | Linked List |
+|-----------|-------------|-------------|
+| Access item by index (e.g., `[5]`) | O(1) — instant | O(n) — must walk from head |
+| Add to the front | O(n) — everything shifts | O(1) — just re-link head |
+| Add to the end | O(1) — usually fast | O(n) — must walk to end |
+| Delete from anywhere | O(n) | O(n) to find + O(1) to remove |
 
-Use a linked list when you need fast insertions/deletions at the front and don't need random index access.
-
----
-
-## Hints for This Week's Assignment
-
-- **Draw it out.** Before writing a single line of code, draw boxes and arrows representing the nodes. Then trace through your algorithm on paper first.
-- Every method that modifies the list must handle the **empty list** case — always check `self.head is None` first.
-- When traversing, use a `current` variable — **never** advance `self.head` directly, or you'll lose the list.
-- For deletion, you need the node **before** the one you want to remove. That's why you check `current.next.value` (the next node's value) while sitting on `current`.
-- After every operation, print the full list to verify the result is what you expected.
+**Bottom line:** Use a linked list when you need fast additions/deletions at the front, and don't need random access by index.
 
 ---
 
@@ -145,94 +160,95 @@ Use a linked list when you need fast insertions/deletions at the front and don't
 
 **File to create:** `module_06/linked_list.py`
 
-You will implement a complete `LinkedList` class from scratch, then demonstrate it with a real use case. Work through each step in order — each one adds a new method to the class.
+You'll build a complete `LinkedList` class from scratch. After each step, test your code before moving on.
 
 ---
 
-### Step 1 — Implement the `Node` class
+### Step 1 — Build the `Node` class
 
-Create a `Node` class with:
-- `value` — the data stored in this node
-- `next` — initialized to `None`
+`Node` should have two attributes: `value` and `next`. `next` starts as `None`.
 
 ---
 
-### Step 2 — Implement the `LinkedList` class skeleton
+### Step 2 — Build the `LinkedList` class
 
-Create a `LinkedList` class with:
-- `__init__` that sets `self.head = None`
-- A `__str__` method that returns a string representation of the list, like:  
-  `"10 → 20 → 30 → None"`  
-  **Hint:** Traverse the list, collect values into a list, then `" → ".join(...)` them and append `" → None"`.
+Start with just `__init__` (sets `self.head = None`) and `__str__`.
 
-Test it immediately:
+`__str__` should return the list as a readable string. Walk the chain and collect all values, then format them like:
+```
+10 → 20 → 30 → None
+```
+
+Test it:
 ```python
 ll = LinkedList()
-print(ll)   # None
+print(ll)    # None
 ```
 
 ---
 
-### Step 3 — Implement `append(value)`
+### Step 3 — `append(value)`
 
-Add a new node to the **end** of the list. Handle the empty list case (new node becomes the head).
+Add a value to the end. Handle the empty list case.
 
-Test:
 ```python
 ll.append(10)
 ll.append(20)
 ll.append(30)
-print(ll)   # 10 → 20 → 30 → None
+print(ll)    # 10 → 20 → 30 → None
 ```
 
 ---
 
-### Step 4 — Implement `prepend(value)`
+### Step 4 — `prepend(value)`
 
-Add a new node to the **front** of the list.
+Add a value to the front.
 
-Test:
 ```python
 ll.prepend(5)
-print(ll)   # 5 → 10 → 20 → 30 → None
+print(ll)    # 5 → 10 → 20 → 30 → None
 ```
 
 ---
 
-### Step 5 — Implement `delete(value)`
+### Step 5 — `delete(value)`
 
-Remove the **first** node whose value matches the given value. Handle these cases:
-1. Empty list — do nothing.
-2. The head node matches — update `self.head`.
-3. A middle or tail node matches — relink the previous node's `next`.
-4. Value not found — do nothing.
-
-Test:
-```python
-ll.delete(20)
-print(ll)   # 5 → 10 → 30 → None
-ll.delete(5)
-print(ll)   # 10 → 30 → None
-ll.delete(99)  # Not found — list unchanged
-print(ll)   # 10 → 30 → None
-```
-
----
-
-### Step 6 — Implement `search(value)`
-
-Return `True` if the value exists in the list, `False` otherwise.
+Remove the first node that has the given value. Test all four cases:
 
 ```python
-print(ll.search(10))   # True
-print(ll.search(99))   # False
+ll.delete(20)        # Delete middle node
+print(ll)            # 5 → 10 → 30 → None
+
+ll.delete(5)         # Delete head
+print(ll)            # 10 → 30 → None
+
+ll.delete(99)        # Value not in list — do nothing
+print(ll)            # 10 → 30 → None
+
+ll.delete(10)
+ll.delete(30)
+ll.delete(30)        # Delete from empty list — do nothing
+print(ll)            # None
 ```
 
 ---
 
-### Step 7 — Implement `length()`
+### Step 6 — `search(value)`
 
-Return the number of nodes in the list by traversing and counting.
+Return `True` if the value is anywhere in the list, `False` if not.
+
+```python
+ll.append(10)
+ll.append(20)
+print(ll.search(10))    # True
+print(ll.search(99))    # False
+```
+
+---
+
+### Step 7 — `length()`
+
+Return the number of nodes. Walk the chain and count.
 
 ```python
 print(ll.length())   # 2
@@ -240,51 +256,54 @@ print(ll.length())   # 2
 
 ---
 
-### Step 8 — Implement `reverse()`
+### Step 8 — `reverse()`
 
-Reverse the list **in place** (do not create a new list). After reversing, `self.head` should point to what was previously the tail.
+Reverse the list **in place** — don't create a new list. After reversing, what was the tail becomes the new head.
 
-**Hint:** Use three variables — `prev`, `current`, `next_node` — and re-link each node's `next` to point backward.
+This one is tricky. Use three variables: `prev` (starts as `None`), `current` (starts at head), and `next_node`. On each step:
+1. Save `current.next` into `next_node` (so you don't lose it)
+2. Point `current.next` backward to `prev`
+3. Move `prev` and `current` one step forward
 
 ```python
 ll.append(40)
 ll.append(50)
-print(ll)          # 10 → 30 → 40 → 50 → None
+print(ll)        # 10 → 20 → 40 → 50 → None
 ll.reverse()
-print(ll)          # 50 → 40 → 30 → 10 → None
+print(ll)        # 50 → 40 → 20 → 10 → None
 ```
 
 ---
 
-### Step 9 — Real-world demo: browser history
+### Step 9 — Browser history demo
 
-At the bottom of your file (in a `main()` function), simulate a simple browser history using your linked list:
-
-1. Prepend each URL as the user "visits" it (most recent at the front).
-2. Print the full history.
-3. Delete a URL (user clears it from history).
-4. Print the updated history.
+In a `main()` function, simulate browser history. The most recently visited page goes to the front (use `prepend`):
 
 ```python
-history = LinkedList()
-for url in ["google.com", "github.com", "stackoverflow.com", "python.org"]:
-    history.prepend(url)
-print("History:", history)
-history.delete("github.com")
-print("After removing github.com:", history)
-print("Total pages:", history.length())
+def main():
+    history = LinkedList()
+    pages = ["google.com", "github.com", "stackoverflow.com", "python.org"]
+    for page in pages:
+        history.prepend(page)    # Most recent at front
+
+    print("History:", history)
+    history.delete("github.com")
+    print("After removing github.com:", history)
+    print("Pages visited:", history.length())
+
+main()
 ```
 
 ---
 
 ### Checklist Before Submitting
 
-- [ ] `Node` class with `value` and `next` attributes.
-- [ ] `LinkedList.__str__` produces the correct `"a → b → ... → None"` format.
-- [ ] `append()` adds to the end; handles empty list.
-- [ ] `prepend()` adds to the front.
-- [ ] `delete()` handles all four edge cases (empty, head match, middle/tail match, not found).
-- [ ] `search()` returns `True`/`False` correctly.
-- [ ] `length()` returns the correct count.
-- [ ] `reverse()` reverses in place without creating a new list.
-- [ ] Browser history demo runs correctly in `main()`.
+- [ ] `Node` has `value` and `next` (initialized to `None`)
+- [ ] `__str__` produces the `"a → b → ... → None"` format
+- [ ] `append()` works and handles empty list
+- [ ] `prepend()` works and makes the new node the head
+- [ ] `delete()` handles: empty list, delete head, delete middle/tail, value not found
+- [ ] `search()` returns `True`/`False`
+- [ ] `length()` returns the correct count
+- [ ] `reverse()` reverses in place (no new list created)
+- [ ] Browser history demo runs and produces correct output

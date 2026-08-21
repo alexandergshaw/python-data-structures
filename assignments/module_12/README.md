@@ -1,58 +1,69 @@
 # Week 12 — Hash Tables
-
-A **hash table** (also called a hash map or dictionary) is one of the most powerful and widely used data structures. It achieves near-instant lookup, insertion, and deletion — on average O(1) — by using a **hash function** to convert keys into array indices.
+### Hash Functions, Collisions, Chaining, Probing, and Resizing
 
 ---
 
-## Concepts Covered
+## Welcome!
 
-### 1. Hash Functions
+Python's `dict` is the most useful data structure in the language. This week you learn exactly how it works by building one yourself. The secret is a **hash table** — a structure that can store and retrieve data in O(1) time on average, no matter how big it gets.
 
-A **hash function** takes a key and returns an integer (the hash value). You use that integer as an index into an array.
+---
+
+## Concept 1: The Core Idea
+
+Imagine you have 1,000 lockers numbered 0 to 999. Each person gets assigned a locker number based on their name using a formula. To find someone's stuff later, you just run the same formula on their name → get the locker number → open that locker. No searching required.
+
+That formula is a **hash function**. The row of lockers is the **array** backing the hash table.
+
+---
+
+## Concept 2: Hash Functions
+
+A hash function takes a **key** (like a string or number) and returns an integer that becomes the index into the array.
 
 ```python
-def hash_function(key, size):
-    return hash(key) % size   # Python's built-in hash(), mod table size
+def _hash(self, key):
+    return hash(key) % self.size
+    # hash() is Python's built-in — works on strings, numbers, tuples
+    # % self.size keeps the result in range [0, size-1]
 ```
 
-Properties of a good hash function:
-- **Deterministic:** Same key always produces the same hash.
-- **Uniform distribution:** Hashes spread evenly across the table to minimize clustering.
-- **Fast:** Computing the hash should be O(1).
+A good hash function:
+- Always gives the **same output** for the same input (deterministic)
+- Spreads keys **evenly** across all slots (avoids everything piling up in one place)
+- Runs **fast** — O(1)
+
+⚠️ Python's `hash()` can return negative numbers. Always `% self.size` to get a valid positive index.
 
 ---
 
-### 2. Basic Structure
+## Concept 3: Collisions — When Two Keys Get the Same Locker
 
-A hash table is backed by a fixed-size array. Each slot in the array is called a **bucket**.
+Even with a great hash function, two different keys will sometimes hash to the same index. This is called a **collision**.
 
-```python
-class HashTable:
-    def __init__(self, size=16):
-        self.size = size
-        self.buckets = [None] * size   # Array of buckets
+**Analogy:** You and a classmate both get assigned locker #42. There's a conflict. You need a plan for handling it.
 
-    def _hash(self, key):
-        return hash(key) % self.size
+There are two main strategies:
+
+---
+
+## Concept 4: Strategy 1 — Separate Chaining
+
+Each "locker" (bucket) doesn't hold just one item — it holds a **list** of items. If two keys hash to the same index, they both go in that list.
+
+```
+Bucket 0: []
+Bucket 1: [["apple", 1]]
+Bucket 2: [["name", "Alex"], ["city", "NYC"]]   ← two items in same bucket!
+Bucket 3: [["score", 95]]
 ```
 
----
-
-### 3. Collisions
-
-A **collision** occurs when two different keys hash to the same index. Collisions are inevitable (pigeonhole principle) — the key is handling them gracefully.
-
----
-
-### 4. Separate Chaining
-
-Each bucket holds a **list** (chain) of all key-value pairs that hash to that index:
-
 ```python
-class HashTable:
+class HashTableChaining:
     def __init__(self, size=16):
         self.size = size
-        self.buckets = [[] for _ in range(size)]   # List of lists
+        self.buckets = [[] for _ in range(size)]   # List of empty lists
+        self.count = 0
 
     def _hash(self, key):
         return hash(key) % self.size
@@ -61,30 +72,33 @@ class HashTable:
         index = self._hash(key)
         for pair in self.buckets[index]:
             if pair[0] == key:
-                pair[1] = value   # Update existing key
+                pair[1] = value    # Key exists — update it
                 return
-        self.buckets[index].append([key, value])
+        self.buckets[index].append([key, value])   # New key — add it
+        self.count += 1
 
     def get(self, key):
         index = self._hash(key)
         for pair in self.buckets[index]:
             if pair[0] == key:
                 return pair[1]
-        raise KeyError(key)
+        raise KeyError(key)        # Key not found
 ```
 
 ---
 
-### 5. Linear Probing (Open Addressing)
+## Concept 5: Strategy 2 — Linear Probing (Open Addressing)
 
-Instead of chaining, store all entries in the array itself. If a bucket is occupied, scan forward until you find an empty slot:
+Instead of lists in each bucket, every item lives directly in the main array. If a slot is taken, you **probe** (try) the next slot, then the next, until you find an empty one.
+
+**Analogy:** You arrive at a parking lot and your assigned spot is taken. You drive to the next spot. Taken again? Next one. Until you find an open space.
 
 ```python
 def put(self, key, value):
     index = self._hash(key)
     while self.buckets[index] is not None:
         if self.buckets[index][0] == key:
-            self.buckets[index] = (key, value)   # Update
+            self.buckets[index] = (key, value)   # Update existing
             return
         index = (index + 1) % self.size          # Probe next slot
     self.buckets[index] = (key, value)
@@ -92,33 +106,34 @@ def put(self, key, value):
 
 ---
 
-### 6. Tombstones
+## Concept 6: Tombstones — The Deletion Problem
 
-When you **delete** an entry in an open-addressing table, you cannot simply set the slot to `None` — that would break probe chains for other keys. Instead, mark it with a **tombstone** sentinel:
+With linear probing, you can't just set a deleted slot to `None`. If you do, future lookups for keys that were inserted past that slot will stop too early and return "not found" incorrectly.
+
+**Solution:** Mark deleted slots with a special **tombstone** value. During lookups, you skip tombstones (keep probing). During insertions, you can reuse tombstone slots.
+
+**Analogy:** In that parking lot, a spot marked with an orange cone means "temporarily out of service — skip me but keep looking." It's different from an empty spot (stop and park here).
 
 ```python
-DELETED = object()   # Unique sentinel
+_DELETED = object()    # A unique sentinel — nothing else equals this
 
 def delete(self, key):
     index = self._hash(key)
     while self.buckets[index] is not None:
-        if self.buckets[index] is not DELETED and \
-           self.buckets[index][0] == key:
-            self.buckets[index] = DELETED
+        if self.buckets[index] is not _DELETED and self.buckets[index][0] == key:
+            self.buckets[index] = _DELETED    # Mark with tombstone
+            self.count -= 1
             return
         index = (index + 1) % self.size
 ```
 
-During a `get`, skip tombstone slots (keep probing); during a `put`, you can reuse them.
-
 ---
 
-### 7. Load Factor and Resizing
+## Concept 7: Load Factor and Resizing
 
-The **load factor** is `n / size` (number of entries ÷ table size).
+The **load factor** is `number of items / array size`. When it gets too high (usually above 0.7), the table becomes crowded and performance degrades.
 
-- A high load factor (> 0.7) means more collisions and slower performance.
-- When the load factor exceeds a threshold, **resize** the table (typically double its size) and **rehash** all existing entries.
+The fix: **double the size** of the array and re-insert everything (rehash). This keeps the load factor low.
 
 ```python
 def _load_factor(self):
@@ -126,20 +141,9 @@ def _load_factor(self):
 
 def put(self, key, value):
     if self._load_factor() > 0.7:
-        self._resize()
-    # ... rest of put logic
+        self._resize()     # Double the table before inserting
+    # ... rest of put
 ```
-
----
-
-## Hints for This Week's Assignment
-
-- **Python's `dict` is a hash table.** When your assignment asks you to build one, implement it yourself — don't wrap `dict`. But do use `dict` to verify your results.
-- Start with **separate chaining** — it's simpler. Move to linear probing after you have chaining working.
-- For chaining, iterate the list in a bucket to check if the key already exists before appending — otherwise you'll end up with duplicate keys.
-- For linear probing, be careful to handle the case where the table is full (all slots occupied) — add a guard or resize before inserting.
-- Test thoroughly: insert duplicate keys (should update, not add), retrieve missing keys (should raise `KeyError` or return a default), and delete then re-insert.
-- Python's built-in `hash()` function can return negative numbers — always `% self.size` to get a valid positive index.
 
 ---
 
@@ -147,69 +151,66 @@ def put(self, key, value):
 
 **File to create:** `module_12/hash_table.py`
 
-You will implement two versions of a hash table — one using separate chaining and one using linear probing — and compare them. Work through each step in order.
-
 ---
 
-### Step 1 — `HashTableChaining` skeleton
+### Step 1 — `HashTableChaining` skeleton and `_hash`
 
-Create a class `HashTableChaining` with:
-- `self.size = 16` (default bucket count)
-- `self.buckets = [[] for _ in range(self.size)]` — list of empty lists
-- `self.count = 0` — number of stored key-value pairs
-- `_hash(key)` — returns `hash(key) % self.size`
+```python
+class HashTableChaining:
+    def __init__(self, size=16):
+        self.size = size
+        self.buckets = [[] for _ in range(size)]
+        self.count = 0
+
+    def _hash(self, key):
+        return hash(key) % self.size
+```
 
 ---
 
 ### Step 2 — `put(key, value)`
 
-Insert or update a key-value pair:
-1. Hash the key to find the bucket index.
-2. Search the bucket list for an existing pair with the same key.
-   - If found, **update** its value.
-   - If not found, **append** `[key, value]` to the bucket and increment `self.count`.
-
-```python
-t = HashTableChaining()
-t.put("name", "Alice")
-t.put("age", 20)
-t.put("name", "Bob")   # Update existing key
-```
+Search the bucket at `_hash(key)`. If the key already exists, update its value. Otherwise, append `[key, value]` to the bucket and increment `count`.
 
 ---
 
 ### Step 3 — `get(key)`
 
-Search the correct bucket for a pair whose first element equals `key`. Return its value. Raise `KeyError(key)` if not found.
+Search the bucket. Return the value if found. Raise `KeyError(key)` if not.
 
 ```python
-print(t.get("name"))   # Bob
-print(t.get("age"))    # 20
-# t.get("gpa") → KeyError: 'gpa'
+t = HashTableChaining()
+t.put("name", "Alice")
+t.put("age", 20)
+t.put("name", "Bob")     # Update existing key
+print(t.get("name"))     # Bob
+print(t.get("age"))      # 20
+# t.get("gpa")  →  KeyError: 'gpa'
 ```
 
 ---
 
 ### Step 4 — `delete(key)`
 
-Remove the pair with the given key from its bucket. Decrement `self.count`. Do nothing if the key is not found.
+Remove the pair from its bucket. Decrement `count`. Do nothing if key not found.
 
 ```python
 t.delete("age")
-# t.get("age") → KeyError
+# t.get("age")  →  KeyError
 ```
 
 ---
 
-### Step 5 — `__str__()` and `load_factor()`
+### Step 5 — `load_factor()` and `__str__()`
 
-Add:
-- `load_factor()` returning `self.count / self.size` (as a float)
-- `__str__()` returning a readable summary showing non-empty buckets:
-
+```python
+def load_factor(self):
+    return self.count / self.size
 ```
-HashTable (16 buckets, 3 items, load=0.19):
-  Bucket 2: [['city', 'NYC']]
+
+`__str__` should show non-empty buckets:
+```
+HashTable (16 buckets, 2 items, load=0.13):
   Bucket 7: [['name', 'Bob']]
   Bucket 11: [['score', 95]]
 ```
@@ -218,49 +219,39 @@ HashTable (16 buckets, 3 items, load=0.19):
 
 ### Step 6 — `HashTableProbing` with linear probing
 
-Create a **second class** `HashTableProbing` that stores entries in a flat array using linear probing.
+Create a second class that uses linear probing. Use `_EMPTY = None` and `_DELETED = object()` as sentinels.
 
-Use a sentinel object `_EMPTY = object()` and `_DELETED = object()` to distinguish empty slots from deleted ones.
-
-Implement:
-- `put(key, value)` — find the slot (probe forward on collision), insert or update.
-- `get(key)` — probe forward; skip `_DELETED` slots; raise `KeyError` if an `_EMPTY` slot is hit.
-- `delete(key)` — find the slot and mark it `_DELETED` (tombstone).
+Implement `put`, `get`, and `delete` using the probing logic described above.
 
 ```python
 p = HashTableProbing(size=8)
 p.put("a", 1)
 p.put("b", 2)
 p.put("c", 3)
-print(p.get("b"))   # 2
+print(p.get("b"))    # 2
 p.delete("b")
-# p.get("b") → KeyError
-print(p.get("c"))   # 3  — probing still finds c correctly after b is deleted
+print(p.get("c"))    # 3 — still works after tombstone!
+# p.get("b")  →  KeyError
 ```
 
 ---
 
-### Step 7 — Collision demonstration
+### Step 7 — Show a collision happening
 
-Show that your chaining implementation handles collisions gracefully:
-
-1. Find two strings that hash to the same bucket in a size-8 table (trial-and-error is fine).
-2. Insert both. Print the table to show both are stored in the same bucket.
-3. Retrieve both and verify the correct values come back.
+Find two keys that hash to the same bucket in a size-8 table. This is easiest by brute force:
 
 ```python
-# Example — find two keys that collide:
 size = 8
-keys = ["cat", "dog", "ant", "bee", "emu", "gnu", "hen", "jay", "koi"]
-for k in keys:
+test_keys = ["cat", "dog", "ant", "bee", "emu", "gnu", "hen", "jay", "koi", "owl"]
+for k in test_keys:
     print(f"{k!r:8} → bucket {hash(k) % size}")
 ```
 
+Identify two that share a bucket. Insert both into `HashTableChaining`, then retrieve both and verify they're stored correctly.
+
 ---
 
-### Step 8 — Functional comparison
-
-Run both hash table implementations with the same data and verify they return identical results:
+### Step 8 — Compare both implementations
 
 ```python
 data = [("apple", 1), ("banana", 2), ("cherry", 3), ("date", 4), ("elderberry", 5)]
@@ -272,20 +263,20 @@ for k, v in data:
     probe.put(k, v)
 
 for k, _ in data:
-    assert chain.get(k) == probe.get(k), f"Mismatch on key {k!r}"
+    assert chain.get(k) == probe.get(k), f"Mismatch on {k!r}"
 
-print("Both implementations agree on all keys.")
+print("Both implementations return the same values for all keys.")
 ```
 
 ---
 
 ### Checklist Before Submitting
 
-- [ ] `HashTableChaining.put()` inserts new keys and updates existing ones.
-- [ ] `HashTableChaining.get()` raises `KeyError` for missing keys.
-- [ ] `HashTableChaining.delete()` removes the key; subsequent `get()` raises `KeyError`.
-- [ ] `load_factor()` returns the correct float.
-- [ ] `__str__()` shows non-empty buckets with their contents.
-- [ ] `HashTableProbing` handles tombstone deletion correctly (`get()` still finds later keys).
-- [ ] The collision demonstration shows two keys sharing a bucket.
-- [ ] The comparison assertion passes for both implementations.
+- [ ] `HashTableChaining.put()` inserts new keys and updates existing ones
+- [ ] `HashTableChaining.get()` raises `KeyError` for missing keys
+- [ ] `HashTableChaining.delete()` removes keys; later `get()` raises `KeyError`
+- [ ] `load_factor()` returns the correct float
+- [ ] `__str__()` shows non-empty buckets with their contents
+- [ ] `HashTableProbing` uses tombstones for deletion and still finds later keys
+- [ ] Collision demonstration shows two keys in the same bucket
+- [ ] Comparison assertion passes for both implementations

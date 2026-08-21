@@ -1,37 +1,45 @@
 # Week 7 — Stacks and Queues
-
-Stacks and queues are **abstract data types** — they define *what* you can do with data, not *how* the data is stored. This week you implement both and use them to solve real problems.
-
----
-
-## Concepts Covered
-
-### 1. Abstract Data Types (ADTs)
-
-An **ADT** is a mathematical model for a data structure defined by its behavior (the operations it supports), not its implementation. Think of it like a contract:
-
-- A stack says: "I will let you push, pop, and peek."
-- It doesn't say whether it uses a list, a linked list, or something else internally.
-
-This separation lets you swap implementations without changing the code that uses them.
+### Abstract Data Types, LIFO, FIFO, and Balanced Brackets
 
 ---
 
-### 2. Stacks — LIFO (Last In, First Out)
+## Welcome!
 
-A **stack** works like a stack of plates:
-- You add to the **top** (`push`)
-- You remove from the **top** (`pop`)
-- The last item added is the first one removed — **LIFO**
+This week you learn two of the most useful data structures in computer science: **stacks** and **queues**. You've already used both of them in real life today — you just didn't know it had a name.
+
+---
+
+## Concept 1: Abstract Data Types (ADTs)
+
+An **abstract data type** is a description of what you can *do* with a data structure, without specifying exactly how it's built internally.
+
+**Analogy:** Think of a TV remote. It's an abstract interface — you press "volume up" and the volume goes up. You don't know or care whether the remote uses infrared light, Bluetooth, or radio waves. The *what* (raise the volume) is separate from the *how* (the electronics).
+
+A stack says: "I support push, pop, and peek." It doesn't say whether it uses a Python list, a linked list, or something else internally. The contract is the behavior, not the implementation.
+
+---
+
+## Concept 2: Stacks — Last In, First Out (LIFO)
+
+A stack works like a **stack of plates**:
+- You add plates to the **top** (push)
+- You take plates from the **top** (pop)
+- The most recently added plate is the first one you take off
+
+**LIFO: Last In, First Out** — the last thing added is the first thing removed.
 
 ```
 Push 1 → [1]
 Push 2 → [1, 2]
 Push 3 → [1, 2, 3]
-Pop   → returns 3, stack is [1, 2]
+Pop   → removes 3 → [1, 2]
+Pop   → removes 2 → [1]
 ```
 
-**Real-world uses:** undo/redo, function call management (the call stack), browser back button.
+**Real-world examples of stacks:**
+- Your browser's back button — each page you visit gets pushed. Back pops the most recent.
+- Ctrl+Z undo — each action gets pushed. Undo pops the last action.
+- The function call stack — when Python calls a function, it pushes the current location so it can come back when the function finishes.
 
 **Implementation using a Python list:**
 
@@ -41,16 +49,16 @@ class Stack:
         self._data = []
 
     def push(self, value):
-        self._data.append(value)      # Add to top (end of list)
+        self._data.append(value)      # Add to the "top" (end of list)
 
     def pop(self):
         if self.is_empty():
-            raise IndexError("Stack is empty")
-        return self._data.pop()       # Remove from top (end of list)
+            raise IndexError("Cannot pop from an empty stack")
+        return self._data.pop()       # Remove from the "top"
 
     def peek(self):
         if self.is_empty():
-            raise IndexError("Stack is empty")
+            raise IndexError("Cannot peek at an empty stack")
         return self._data[-1]         # Look at top without removing
 
     def is_empty(self):
@@ -60,27 +68,32 @@ class Stack:
         return len(self._data)
 ```
 
-All stack operations are **O(1)**.
+All operations are O(1) — instant, regardless of size.
 
 ---
 
-### 3. Queues — FIFO (First In, First Out)
+## Concept 3: Queues — First In, First Out (FIFO)
 
-A **queue** works like a line of people waiting:
-- You add to the **back** (`enqueue`)
-- You remove from the **front** (`dequeue`)
-- The first item added is the first one removed — **FIFO**
+A queue works like a **line at a coffee shop**:
+- You join at the **back** (enqueue)
+- You're served at the **front** (dequeue)
+- The first person in line is the first person served
+
+**FIFO: First In, First Out** — the first thing added is the first thing removed.
 
 ```
-Enqueue 1 → [1]
-Enqueue 2 → [1, 2]
-Enqueue 3 → [1, 2, 3]
-Dequeue   → returns 1, queue is [2, 3]
+Enqueue "Alice" → [Alice]
+Enqueue "Bob"   → [Alice, Bob]
+Enqueue "Carol" → [Alice, Bob, Carol]
+Dequeue → removes Alice → [Bob, Carol]
 ```
 
-**Real-world uses:** print queues, task scheduling, breadth-first search.
+**Real-world examples of queues:**
+- A printer queue — print jobs are printed in the order they were submitted
+- Customer service — first caller gets helped first
+- BFS graph traversal (you'll see this in Week 13)
 
-**Implementation using `collections.deque` (efficient for both ends):**
+**Implementation using `collections.deque`:**
 
 ```python
 from collections import deque
@@ -90,16 +103,16 @@ class Queue:
         self._data = deque()
 
     def enqueue(self, value):
-        self._data.append(value)          # Add to back
+        self._data.append(value)         # Add to the back
 
     def dequeue(self):
         if self.is_empty():
-            raise IndexError("Queue is empty")
-        return self._data.popleft()       # Remove from front — O(1)
+            raise IndexError("Cannot dequeue from an empty queue")
+        return self._data.popleft()      # Remove from the front
 
     def front(self):
         if self.is_empty():
-            raise IndexError("Queue is empty")
+            raise IndexError("Cannot peek at an empty queue")
         return self._data[0]
 
     def is_empty(self):
@@ -109,22 +122,21 @@ class Queue:
         return len(self._data)
 ```
 
-> **Why not use a regular list for a queue?** `list.pop(0)` is O(n) because every element must shift. `deque.popleft()` is O(1).
+**Why `deque` and not a regular list?** Removing from the front of a Python list (`list.pop(0)`) is O(n) — every other item has to shift. `deque.popleft()` is O(1). Use the right tool.
 
 ---
 
-### 4. Balanced Bracket Checking
+## Concept 4: Balanced Bracket Checking (Classic Stack Problem)
 
-A classic stack application: verifying that brackets in a string are properly balanced and nested.
+Consider the string `"({[]})"`. The brackets are properly balanced and nested. But `"({[})"` is not — the `}` closes before the `[` does.
 
-**Algorithm:**
-1. Scan each character left to right.
-2. If you see an **opening** bracket (`(`, `[`, `{`), push it onto the stack.
-3. If you see a **closing** bracket (`)`, `]`, `}`):
-   - If the stack is empty → unbalanced (no matching opener).
-   - Pop the stack and check if the opener matches the closer.
-   - If they don't match → unbalanced.
-4. After scanning all characters, if the stack is empty → balanced. Otherwise → unbalanced.
+**How to check with a stack:**
+- Scan each character left to right
+- If you see an *opening* bracket (`(`, `[`, `{`) → push it onto the stack
+- If you see a *closing* bracket (`)`, `]`, `}`) → check if the top of the stack is the matching opener. If yes, pop. If no (or stack is empty), it's unbalanced.
+- After scanning everything: if the stack is empty → balanced. If not → unbalanced (some opener was never closed).
+
+**Analogy:** Imagine stacking "open" cards face-up. Every time you see a "close" card, it must match the card on top. If it does, remove the top card. If it doesn't, something is wrong.
 
 ```python
 def is_balanced(s):
@@ -133,27 +145,14 @@ def is_balanced(s):
 
     for char in s:
         if char in '([{':
-            stack.append(char)
+            stack.append(char)      # Push openers
         elif char in ')]}':
             if not stack or stack[-1] != matching[char]:
-                return False
-            stack.pop()
+                return False        # No matching opener
+            stack.pop()             # Matched — pop it
 
-    return len(stack) == 0
-
-print(is_balanced("({[]})"))   # True
-print(is_balanced("({[})"))    # False
+    return len(stack) == 0          # True if no unmatched openers remain
 ```
-
----
-
-## Hints for This Week's Assignment
-
-- **Always check `is_empty()` before `pop()` or `dequeue()`** — removing from an empty structure raises an error.
-- Use Python's built-in `list` for a stack (append/pop from the end are both O(1)).
-- Use `collections.deque` for a queue — it gives you O(1) at both ends.
-- For balanced brackets, trace through a small example by hand before coding: `"([)]"` should return `False` because the close order is wrong.
-- The difference between LIFO and FIFO is the whole point — draw a diagram if you're confused about which end to add/remove from.
 
 ---
 
@@ -161,97 +160,84 @@ print(is_balanced("({[})"))    # False
 
 **File to create:** `module_07/stacks_queues.py`
 
-You will implement a `Stack` class, a `Queue` class, and two real-world applications. Work through each step in order.
+You'll implement both data structures and build three real-world applications.
 
 ---
 
-### Step 1 — Implement the `Stack` class
+### Step 1 — Implement `Stack`
 
-Your `Stack` must support these methods:
+Your stack must have:
+- `push(value)` — add to top
+- `pop()` — remove and return top; raise `IndexError` if empty
+- `peek()` — return top without removing; raise `IndexError` if empty
+- `is_empty()` — return `True` if empty
+- `size()` — return count of items
+- `__str__()` — return a string like `"Stack (top → bottom): [3, 2, 1]"`
 
-| Method            | What it does                                          |
-|-------------------|-------------------------------------------------------|
-| `push(value)`     | Add `value` to the top of the stack                   |
-| `pop()`           | Remove and return the top value; raise `IndexError` if empty |
-| `peek()`          | Return the top value without removing it; raise `IndexError` if empty |
-| `is_empty()`      | Return `True` if the stack has no items               |
-| `size()`          | Return the number of items                            |
-| `__str__()`       | Return a string like `"Stack (top → bottom): [3, 2, 1]"` |
-
-Test it:
+Test:
 ```python
 s = Stack()
 s.push(1)
 s.push(2)
 s.push(3)
-print(s)          # Stack (top → bottom): [3, 2, 1]
-print(s.pop())    # 3
-print(s.peek())   # 2
-print(s.size())   # 2
+print(s)           # Stack (top → bottom): [3, 2, 1]
+print(s.pop())     # 3
+print(s.peek())    # 2
+print(s.size())    # 2
+print(s.is_empty())   # False
 ```
 
 ---
 
-### Step 2 — Implement the `Queue` class
+### Step 2 — Implement `Queue`
 
-Use `collections.deque` internally. Your `Queue` must support:
+Your queue must have:
+- `enqueue(value)` — add to back
+- `dequeue()` — remove and return front; raise `IndexError` if empty
+- `front()` — return front without removing; raise `IndexError` if empty
+- `is_empty()` — return `True` if empty
+- `size()` — return count
+- `__str__()` — return `"Queue (front → back): [Alice, Bob, Carol]"`
 
-| Method            | What it does                                          |
-|-------------------|-------------------------------------------------------|
-| `enqueue(value)`  | Add `value` to the back of the queue                  |
-| `dequeue()`       | Remove and return the front value; raise `IndexError` if empty |
-| `front()`         | Return the front value without removing it; raise `IndexError` if empty |
-| `is_empty()`      | Return `True` if the queue has no items               |
-| `size()`          | Return the number of items                            |
-| `__str__()`       | Return a string like `"Queue (front → back): [1, 2, 3]"` |
-
-Test it:
+Test:
 ```python
 q = Queue()
 q.enqueue("Alice")
 q.enqueue("Bob")
 q.enqueue("Carol")
-print(q)              # Queue (front → back): [Alice, Bob, Carol]
-print(q.dequeue())    # Alice
-print(q.front())      # Bob
-print(q.size())       # 2
+print(q)                # Queue (front → back): [Alice, Bob, Carol]
+print(q.dequeue())      # Alice
+print(q.front())        # Bob
 ```
 
 ---
 
-### Step 3 — Application 1: Balanced bracket checker
+### Step 3 — `is_balanced(s)` using your Stack
 
-Write a function `is_balanced(s)` that uses your `Stack` to check whether every opening bracket in the string `s` has a matching closing bracket in the correct order.
+Write the balanced bracket checker described above. Use your `Stack` class (not a plain Python list).
 
-Return `True` if balanced, `False` if not.
-
-Rules:
-- `(` matches `)`
-- `[` matches `]`
-- `{` matches `}`
-- Ignore any character that is not a bracket.
-
-Test cases you must verify:
+Test ALL of these:
 ```python
-print(is_balanced("({[]})"))     # True
-print(is_balanced("{[()]}"))     # True
-print(is_balanced("({[})"))      # False — wrong order
-print(is_balanced("((())"))      # False — missing closing
-print(is_balanced("hello()[]"))  # True — non-brackets ignored
-print(is_balanced(""))           # True — empty string
+print(is_balanced("({[]})"))      # True
+print(is_balanced("{[()]}"))      # True
+print(is_balanced("({[})"))       # False
+print(is_balanced("((())"))       # False — opener with no closer
+print(is_balanced("hello()[]"))   # True — non-brackets ignored
+print(is_balanced(""))            # True — empty string
 ```
 
 ---
 
-### Step 4 — Application 2: Print queue simulator
+### Step 4 — Print Queue Simulator
 
-Write a function `print_queue_demo()` that simulates a printer queue:
+Write a `print_queue_demo()` function that:
+1. Creates a `Queue`
+2. Enqueues at least 5 print jobs (strings like `"Report.pdf"`, `"Photo.png"`, etc.)
+3. Prints the full queue
+4. Processes (dequeues) all jobs in a `while` loop, printing `"Printing: <job>"` for each
+5. Confirms the queue is empty at the end
 
-1. Create a `Queue` and enqueue at least 5 print jobs (strings like `"Report.pdf"`, `"Photo.png"`, etc.).
-2. Print the full queue.
-3. Process (dequeue) jobs one at a time in a loop. For each job, print `"Printing: <job>"`.
-4. After all jobs are processed, confirm the queue is empty.
-
+Expected output:
 ```
 Queue (front → back): [Report.pdf, Photo.png, Letter.docx, Invoice.pdf, Notes.txt]
 Printing: Report.pdf
@@ -259,40 +245,50 @@ Printing: Photo.png
 Printing: Letter.docx
 Printing: Invoice.pdf
 Printing: Notes.txt
-All jobs complete. Queue empty: True
+All jobs done. Queue empty: True
 ```
 
 ---
 
-### Step 5 — Application 3: Undo / Redo with two stacks
+### Step 5 — Undo / Redo System
 
-Write a simple text-editing simulator that supports undo using two stacks: `undo_stack` and `redo_stack`.
+This is a classic stack-of-stacks problem. Write three functions that use **two** `Stack` objects: an `undo_stack` and a `redo_stack`.
 
-Implement these three functions (use your `Stack` class):
+- `do_action(action, undo_stack, redo_stack)`:
+  - Push `action` onto `undo_stack`
+  - Clear `redo_stack` (new actions cancel redo history — just like Word does)
 
-- `do_action(action, undo_stack, redo_stack)` — push `action` onto `undo_stack`; clear `redo_stack` (new actions invalidate redo history).
-- `undo(undo_stack, redo_stack)` — pop from `undo_stack`, push onto `redo_stack`, return the undone action (or `None` if empty).
-- `redo(undo_stack, redo_stack)` — pop from `redo_stack`, push back onto `undo_stack`, return the redone action (or `None` if empty).
+- `undo(undo_stack, redo_stack)`:
+  - Pop from `undo_stack`, push onto `redo_stack`
+  - Return the undone action (or `None` if undo stack is empty)
 
-Demo:
+- `redo(undo_stack, redo_stack)`:
+  - Pop from `redo_stack`, push back onto `undo_stack`
+  - Return the redone action (or `None` if redo stack is empty)
+
+Demo it:
 ```python
-undo_s, redo_s = Stack(), Stack()
+undo_s = Stack()
+redo_s = Stack()
+
 do_action("Type 'Hello'", undo_s, redo_s)
 do_action("Bold text", undo_s, redo_s)
 do_action("Insert image", undo_s, redo_s)
-print("Undo:", undo("Insert image"))    # Undo: Insert image
-print("Undo:", undo("Bold text"))       # Undo: Bold text
-print("Redo:", redo("Bold text"))       # Redo: Bold text
+
+print("Undo:", undo(undo_s, redo_s))    # Insert image
+print("Undo:", undo(undo_s, redo_s))    # Bold text
+print("Redo:", redo(undo_s, redo_s))    # Bold text
+print("Undo:", undo(undo_s, redo_s))    # Bold text (re-undone)
 ```
 
 ---
 
 ### Checklist Before Submitting
 
-- [ ] `Stack` with `push`, `pop`, `peek`, `is_empty`, `size`, `__str__`.
-- [ ] `pop()` and `peek()` raise `IndexError` on an empty stack.
-- [ ] `Queue` (using `deque`) with `enqueue`, `dequeue`, `front`, `is_empty`, `size`, `__str__`.
-- [ ] `dequeue()` and `front()` raise `IndexError` on an empty queue.
-- [ ] `is_balanced()` passes all six test cases above.
-- [ ] Print queue demo runs end-to-end and shows all jobs processed.
-- [ ] Undo/redo demo shows correct behavior for undo and redo actions.
+- [ ] `Stack` with all six required methods; `pop()` and `peek()` raise `IndexError` on empty
+- [ ] `Queue` with all six required methods; `dequeue()` and `front()` raise `IndexError` on empty
+- [ ] `Queue` uses `collections.deque` internally (not a list)
+- [ ] `is_balanced()` passes all six test cases above
+- [ ] Print queue demo shows all jobs processed in FIFO order
+- [ ] Undo/redo demo shows correct action names returned
+- [ ] Redo stack is cleared when a new action is performed
