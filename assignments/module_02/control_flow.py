@@ -1,1 +1,2 @@
-# dummy change
+print("Hello World")
+print("My name is Alex")
