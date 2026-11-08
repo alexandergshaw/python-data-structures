@@ -179,7 +179,9 @@ for i in range(10):
 
 ---
 
-## Assignment Instructions
+## Assignment Requirements
+
+The numbered steps and checklist below define what your program must do. Sample prompts, code, and output illustrate the expected behavior; they are examples unless a step explicitly asks you to include them.
 
 **File to create:** `module_02/control_flow.py`
 

@@ -26,6 +26,8 @@ Start simple. Get something working. Then improve it.
 
 ## Choose Your Project
 
+The three options below are alternative project examples; complete one option, not all three. The chosen option's **You must use** list, numbered **Your program should** requirements, and the shared **Design Guidelines** and **What a Strong Submission Looks Like** sections define the requirements.
+
 Pick **one** of the three options below. Read all three before deciding — pick the one that genuinely interests you.
 
 ---

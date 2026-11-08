@@ -189,7 +189,9 @@ print(counts)   # {'Alice': 3, 'Bob': 2, 'Carol': 1}
 
 ---
 
-## Assignment Instructions
+## Assignment Requirements
+
+The numbered steps and checklist below define what your program must do. Sample prompts, code, and output illustrate the expected behavior; they are examples unless a step explicitly asks you to include them.
 
 **File to create:** `module_03/collections.py`
 
