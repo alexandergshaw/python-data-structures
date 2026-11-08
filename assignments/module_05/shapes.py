@@ -1,9 +1,6 @@
-import math
-
-
 class Shape:
     def __init__(self, color):
-        self.color = color
+        pass
 
     def area(self):
         raise NotImplementedError("Subclasses must implement area()")
@@ -12,62 +9,53 @@ class Shape:
         raise NotImplementedError("Subclasses must implement perimeter()")
 
     def describe(self):
-        return (f"A {self.color} shape with area {self.area():.2f} "
-                f"and perimeter {self.perimeter():.2f}")
+        pass
 
 
 class Circle(Shape):
     def __init__(self, color, radius):
-        super().__init__(color)
-        self.radius = radius
+        pass
 
     def area(self):
-        return math.pi * self.radius ** 2
+        pass
 
     def perimeter(self):
-        return 2 * math.pi * self.radius
+        pass
 
 
 class Rectangle(Shape):
     def __init__(self, color, width, height):
-        super().__init__(color)
-        self.width, self.height = width, height
+        pass
 
     def area(self):
-        return self.width * self.height
+        pass
 
     def perimeter(self):
-        return 2 * (self.width + self.height)
+        pass
 
 
 class Triangle(Shape):
     def __init__(self, color, a, b, c):
-        super().__init__(color)
-        self.a, self.b, self.c = a, b, c
+        pass
 
     def perimeter(self):
-        return self.a + self.b + self.c
+        pass
 
     def area(self):
-        semi = self.perimeter() / 2
-        return math.sqrt(semi * (semi - self.a) * (semi - self.b) * (semi - self.c))
+        pass
 
 
 class Square(Rectangle):
     def __init__(self, color, side):
-        super().__init__(color, side, side)
+        pass
 
 
 def largest_shape(shapes):
-    return max(shapes, key=lambda shape: shape.area())
+    pass
 
 
 def main():
-    shapes = [Circle("red", 3), Rectangle("green", 4, 6),
-              Triangle("blue", 3, 4, 5), Square("purple", 5)]
-    for shape in shapes:
-        print(shape.describe())
-    print(f"Largest shape: {largest_shape(shapes).describe()}")
+    pass
 
 
 if __name__ == "__main__":
