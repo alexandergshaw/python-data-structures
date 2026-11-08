@@ -1,0 +1,99 @@
+name: Assignment tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  select:
+    if: github.event.action != 'closed' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    outputs:
+      units: ${{ steps.select.outputs.units }}
+      revision: ${{ steps.select.outputs.revision }}
+    steps:
+      - name: Check changed-file limit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          changed_files=$(gh api "repos/$REPOSITORY/pulls/$PR_NUMBER" --jq '.changed_files')
+          if (( changed_files > 3000 )); then
+            echo "::error::This pull request changes more than 3,000 files. Run all assignment tests manually."
+            exit 1
+          fi
+
+      - name: Select affected units
+        id: select
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          EVENT_ACTION: ${{ github.event.action }}
+          MERGED: ${{ github.event.pull_request.merged }}
+          MERGE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
+          EVENT_SHA: ${{ github.sha }}
+        run: |
+          gh api --paginate "repos/$REPOSITORY/pulls/$PR_NUMBER/files" \
+            --jq '.[] | .filename, .previous_filename // empty' \
+            > "$RUNNER_TEMP/changed-paths"
+
+          python - <<'PY'
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          paths = Path(os.environ["RUNNER_TEMP"], "changed-paths").read_text().splitlines()
+          units = set()
+          run_all = False
+
+          for path in paths:
+              if re.match(r"^assignments/module_[0-9]{2}/", path):
+                  units.add(re.match(r"^assignments/(module_[0-9]{2})/", path).group(1))
+              elif path.startswith("tests/"):
+                  match = re.fullmatch(r"tests/test_(module_[0-9]{2})\.py", path)
+                  if match:
+                      units.add(match.group(1))
+                  else:
+                      run_all = True
+              elif path.startswith(".github/workflows/"):
+                  run_all = True
+
+          if run_all:
+              units = {"all"}
+
+          action = os.environ["EVENT_ACTION"]
+          revision = (
+              os.environ["MERGE_COMMIT"]
+              if action == "closed" and os.environ["MERGED"] == "true"
+              else os.environ["EVENT_SHA"]
+          )
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"units={json.dumps(sorted(units))}\n")
+              output.write(f"revision={revision}\n")
+          PY
+
+  assignment-tests:
+    needs: select
+    if: needs.select.outputs.units != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        unit: ${{ fromJSON(needs.select.outputs.units) }}
+    uses: ./.github/workflows/assignment-tests.yml
+    with:
+      unit: ${{ matrix.unit }}
+      revision: ${{ needs.select.outputs.revision }}
+
