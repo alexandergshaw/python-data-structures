@@ -146,7 +146,9 @@ print(c.area())   # 78.53...
 
 ---
 
-## Assignment Instructions
+## Assignment Requirements
+
+The numbered steps and checklist below define what your program must do. Sample prompts, code, and output illustrate the expected behavior; they are examples unless a step explicitly asks you to include them.
 
 **File to create:** `module_05/shapes.py`
 

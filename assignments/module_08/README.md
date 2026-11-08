@@ -150,7 +150,9 @@ This third step is where most students get stuck. You don't need to trace every 
 
 ---
 
-## Assignment Instructions
+## Assignment Requirements
+
+The numbered steps and checklist below define what your program must do. Sample prompts, code, and output illustrate the expected behavior; they are examples unless a step explicitly asks you to include them.
 
 **File to create:** `module_08/recursion.py`
 

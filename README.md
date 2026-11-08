@@ -109,24 +109,31 @@ Once your instructor approves the PR, you can merge your branch into `main`.
 ```
 python-data-structures/
 ├── README.md                  ← You are here — workflow guide
-└── assignments/
-    ├── README.md              ← Assignment index
-    ├── module_01/             ← Week 1: Python Basics I
-    ├── module_02/             ← Week 2: Python Basics II
-    ├── module_03/             ← Week 3: Functions and Collections
-    ├── module_04/             ← Week 4: Complexity Analysis
-    ├── module_05/             ← Week 5: Object-Oriented Programming
-    ├── module_06/             ← Week 6: Linked Lists
-    ├── module_07/             ← Week 7: Stacks and Queues
-    ├── module_08/             ← Week 8: Recursion
-    ├── module_09/             ← Week 9: Searching and Sorting
-    ├── module_10/             ← Week 10: Trees
-    ├── module_11/             ← Week 11: Heaps and Priority Queues
-    ├── module_12/             ← Week 12: Hash Tables
-    ├── module_13/             ← Week 13: Graphs
-    ├── module_14/             ← Week 14: Algorithmic Paradigms
-    ├── module_15/             ← Week 15: Dynamic Programming
-    └── module_16/             ← Week 16: Final Capstone
+├── assignments/
+│   ├── README.md              ← Assignment index
+│   ├── module_01/             ← Week 1: Python Basics I
+│   ├── module_02/             ← Week 2: Python Basics II
+│   ├── module_03/             ← Week 3: Functions and Collections
+│   ├── module_04/             ← Week 4: Complexity Analysis
+│   ├── module_05/             ← Week 5: Object-Oriented Programming
+│   ├── module_06/             ← Week 6: Linked Lists
+│   ├── module_07/             ← Week 7: Stacks and Queues
+│   ├── module_08/             ← Week 8: Recursion
+│   ├── module_09/             ← Week 9: Searching and Sorting
+│   ├── module_10/             ← Week 10: Trees
+│   ├── module_11/             ← Week 11: Heaps and Priority Queues
+│   ├── module_12/             ← Week 12: Hash Tables
+│   ├── module_13/             ← Week 13: Graphs
+│   ├── module_14/             ← Week 14: Algorithmic Paradigms
+│   ├── module_15/             ← Week 15: Dynamic Programming
+│   └── module_16/             ← Week 16: Final Capstone
+└── tests/                     ← Tests for the assignment reference answers
 ```
 
-Each module folder contains a `README.md` with a detailed introduction to that week's concepts, examples, and hints to help you complete the assignment.
+Each module folder contains a `README.md` with that week's concepts and examples, followed by a clearly labeled **Assignment Requirements** section. Examples illustrate behavior; the requirements and checklist define what to complete. The corresponding assignment files are concise reference answers, and `tests/` contains checks for them.
+
+Run the checks from the repository root with:
+
+```bash
+python3 -m unittest discover -s tests -t .
+```

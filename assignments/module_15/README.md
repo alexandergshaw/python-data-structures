@@ -186,7 +186,9 @@ This is exactly the Fibonacci sequence! `ways(n) = ways(n-1) + ways(n-2)`.
 
 ---
 
-## Assignment Instructions
+## Assignment Requirements
+
+The numbered steps and checklist below define what your program must do. Sample prompts, code, and output illustrate the expected behavior; they are examples unless a step explicitly asks you to include them.
 
 **File to create:** `module_15/dynamic_programming.py`
 
