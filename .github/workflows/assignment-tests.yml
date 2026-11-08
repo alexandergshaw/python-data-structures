@@ -1,0 +1,49 @@
+name: Assignment test runner
+
+on:
+  workflow_call:
+    inputs:
+      unit:
+        description: Module to test (module_NN) or all modules
+        required: true
+        type: string
+      ref:
+        description: Revision to check out
+        required: true
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Temurin JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Check for g++
+        run: |
+          command -v g++
+          g++ --version
+
+      - name: Run assignment tests
+        env:
+          UNIT: ${{ inputs.unit }}
+        run: |
+          if [ "$UNIT" = "all" ]; then
+            pattern="test_module_*.py"
+          else
+            pattern="test_${UNIT}.py"
+          fi
+          python -m unittest discover -s tests -p "$pattern" -v

@@ -1,0 +1,95 @@
+name: Assignment tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  select-tests:
+    if: github.event.action != 'closed' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.select.outputs.modules }}
+      ref: ${{ steps.select.outputs.ref }}
+    steps:
+      - name: Select tests from changed files
+        id: select
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pull_number = context.issue.number;
+            const pull = await github.rest.pulls.get({ owner, repo, pull_number });
+
+            if (pull.data.changed_files > 3000) {
+              core.setFailed(
+                `This pull request changes ${pull.data.changed_files} files, exceeding the 3,000-file selection limit. Run all assignment tests manually.`
+              );
+              return;
+            }
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number,
+              per_page: 100,
+            });
+
+            const changedPaths = files.flatMap(file =>
+              file.status === "renamed"
+                ? [file.filename, file.previous_filename]
+                : [file.filename]
+            );
+            const modules = new Set();
+            let runAll = false;
+
+            for (const path of changedPaths) {
+              if (
+                path.startsWith("tests/") &&
+                !/^tests\/test_module_\d{2}\.py$/.test(path)
+              ) {
+                runAll = true;
+                break;
+              }
+              if (
+                path === ".github/workflows/merged-assignment-tests.yml" ||
+                path === ".github/workflows/assignment-tests.yml"
+              ) {
+                runAll = true;
+                break;
+              }
+
+              const sourceMatch = path.match(/^assignments\/(module_\d{2})\//);
+              const testMatch = path.match(/^tests\/test_(module_\d{2})\.py$/);
+              if (sourceMatch) modules.add(sourceMatch[1]);
+              if (testMatch) modules.add(testMatch[1]);
+            }
+
+            const selected = runAll ? ["all"] : [...modules].sort();
+            core.setOutput("modules", JSON.stringify(selected));
+            core.setOutput(
+              "ref",
+              pull.data.merged ? pull.data.merge_commit_sha : context.sha
+            );
+
+  assignment-tests:
+    needs: select-tests
+    if: needs.select-tests.result == 'success' && needs.select-tests.outputs.modules != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        unit: ${{ fromJSON(needs.select-tests.outputs.modules) }}
+    uses: ./.github/workflows/assignment-tests.yml
+    with:
+      unit: ${{ matrix.unit }}
+      ref: ${{ needs.select-tests.outputs.ref }}
